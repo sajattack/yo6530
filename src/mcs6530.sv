@@ -8,7 +8,7 @@
     output [7:0] DO,     // Data to processor
     output       OE,     // Indicates data driven on DO
     input        CS1,    // Active-low, same pin as PB6
-    input        CS2,    
+    input        CS2,    // Same pin as PB5
     input        RS_n,  // Active-low ROM select
     output [7:0] PAO,    // port A output
     input  [7:0] PAI,    // port A input
@@ -18,7 +18,7 @@
 
 
   parameter IOT_BASE = 0;
-  parameter ROM_FILE = "6530-002.hex";
+  parameter ROM_FILE = "roms/6530-003.hex";
 
   // When a pin is set to an output (direction = 1), make sure
   // the output data is read as such
