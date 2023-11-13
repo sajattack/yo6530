@@ -9,11 +9,13 @@
     output       OE,     // Indicates data driven on DO
     input        CS1,    // Active-low, same pin as PB6
     input        CS2,    // Same pin as PB5
-    input        RS_n,  // Active-low ROM select
+    input        RS_n,   // Active-low ROM select
     output [7:0] PAO,    // port A output
     input  [7:0] PAI,    // port A input
     output [7:0] PBO,    // port B output
     input  [7:0] PBI,    // port B input
+    output [7:0] DDRA,   // port A OE (data direction register)
+    output [7:0] DDRB,   // port B OE (data direction register)
 );
 
 
