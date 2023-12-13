@@ -1,7 +1,7 @@
 PROJ=mcs6530
 BUILD_DIR=build
 SRC_DIR=src
-SRCS=$(SRC_DIR)/mcs6530.sv $(SRC_DIR)/top.v
+SRCS=$(SRC_DIR)/mcs6530.sv $(SRC_DIR)/top.v $(SRC_DIR)/rom.v $(SRC_DIR)/ram.v
 SEED=1337
 DEVICE=up5k
 PACKAGE=sg48
