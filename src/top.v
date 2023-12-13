@@ -38,10 +38,10 @@ module top(
   inout CS2_PB5,
   inout CS1_PB6,
   inout IRQ_PB7,
+  input R_W,
 
   inout PHI2,
   inout RES,
-  inout R_W
 );
 
 wire we_n;
@@ -49,7 +49,6 @@ wire rst_n;
 wire irq_n;
 wire phi2_io;
 wire phi1_io = ~phi2_io;
-
 
 wire [7:0] data_i;
 wire [7:0] data_o;
@@ -60,6 +59,8 @@ wire [7:0] porta_o;
 wire [7:0] portb_i;
 wire [7:0] portb_o;
 
+wire [7:0] ddra;
+wire [7:0] ddrb;
 
 
 wire [9:0] addr;
@@ -123,7 +124,7 @@ SB_IO #(
 `endif
     .INPUT_CLK         (phi2_io),
     .OUTPUT_CLK        (phi2_io),
-    .OUTPUT_ENABLE     (), // FIXME ?
+    .OUTPUT_ENABLE     (ddra),
     .D_IN_0            (porta_i),
     .D_OUT_0           (porta_o)
 );
@@ -139,7 +140,7 @@ SB_IO #(
 `endif
     .INPUT_CLK         (phi2_io),
     .OUTPUT_CLK        (phi2_io),
-    .OUTPUT_ENABLE     (), // FIXME ?
+    .OUTPUT_ENABLE     (ddrb), 
     .D_IN_0            (portb_i),
     .D_OUT_0           (portb_o)
 );
@@ -164,18 +165,17 @@ mcs6530 mcs6530 (
   .phi2(phi2_io),
   .rst_n(rst_n),
   .we_n(we_n),
-  //.irq_n(portb_i[7]),
   .A(addr),
   .DI(data_i),
   .DO(data_o),
   .OE(OE),
-  .CS1(portb_i[6]),
-  .CS2(portb_i[5]),
   .RS_n(RS0),
   .PAO(porta_o),
   .PAI(porta_i),
   .PBO(portb_o),
   .PBI(portb_i),
+  .DDRA(ddra),
+  .DDRB(ddrb)
 );
 
 endmodule
