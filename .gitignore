@@ -1,1 +1,3 @@
 build/
+*.vcd
+obj_dir/

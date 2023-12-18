@@ -49,6 +49,7 @@ wire rst_n;
 wire irq_n;
 wire phi2_io;
 wire phi1_io = ~phi2_io;
+wire OE;
 
 wire [7:0] data_i;
 wire [7:0] data_o;
@@ -62,8 +63,7 @@ wire [7:0] portb_o;
 wire [7:0] ddra;
 wire [7:0] ddrb;
 
-
-wire [9:0] addr;
+wire [9:0] addr; /* verilator public_flat */
 
 SB_IO #(
     .PIN_TYPE    (6'b0000_01),

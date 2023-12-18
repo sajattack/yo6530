@@ -4,20 +4,20 @@
     input        we_n,   // RW Read high/Write low
     input  [9:0] A,      // Address
     input  [7:0] DI,     // Data from processor
-    output [7:0] DO,     // Data to processor
+    output reg [7:0] DO, // Data to processor
     output       OE,     // Indicates data driven on DO
     input        RS_n,   // Active-low ROM select
-    output [7:0] PAO,    // port A output
+    output reg [7:0] PAO,    // port A output
     input  [7:0] PAI,    // port A input
-    output [7:0] PBO,    // port B output
+    output reg [7:0] PBO,    // port B output
     input  [7:0] PBI,    // port B input
-    output [7:0] DDRA,   // port A OE (data direction register)
-    output [7:0] DDRB   // port B OE (data direction register)
+    output reg [7:0] DDRA,   // port A OE (data direction register)
+    output reg [7:0] DDRB   // port B OE (data direction register)
 );
 
   wire CS1;
   wire CS2;
-  wire irq_n;
+  reg irq_n;
 
   logic timer_irq_en;
   logic timer_irq;
@@ -33,9 +33,8 @@
 
   assign CS1 = PBI[6];
   assign CS2 = PBI[5];
-  //assign PBO[7] = irq_n;
 
-  parameter IOT_BASE = 0;
+  parameter IOT_BASE = 'h1700;
  
 
   // When a pin is set to an output (direction = 1), make sure
@@ -68,8 +67,8 @@
           PBO  <= 8'd0;
           DDRB <= 8'd0;
           timer <= 8'd0;
-          timer_divider <= 9'd0;
-          timer_count <= 9'd0;
+          timer_divider <= 10'd0;
+          timer_count <= 10'd0;
           timer_irq <= 1'd0;
           timer_irq_en <= 1'd0;
       end
@@ -95,7 +94,7 @@
         timer <= timer - 1;
         timer_count <= 0;
           if (timer == 8'd0) begin
-            timer_divider <= 9'd0;
+            timer_divider <= 10'd0;
             timer_irq <= 1'd1;
           end
       end else
@@ -126,14 +125,18 @@
             timer_do <= {7'd0, timer_irq};
 
         timer_count <= timer_count + 1;
-        irq_n <= ~(timer_irq & timer_irq_en);
+        PBO[7] <= ~(timer_irq & timer_irq_en);
   end
 
   wire ram_enable;
   wire rom_enable;
+  wire timer_enable;
+  wire io_enable;
 
-  assign ram_enable = rst_n && !CS1 && RS_n && !CS2 && A[9:7]==3'b111 && !A[2] && !IOT_SELECT;
-  assign rom_enable = rst_n && !CS1 && !RS_n && !CS2 && A[9:7]==3'b111 && !A[2] && !IOT_SELECT;
+  assign ram_enable = rst_n && !CS1 && RS_n && !CS2 && !IOT_SELECT;
+  assign rom_enable = rst_n && !CS1 && !RS_n && !CS2 && !IOT_SELECT;
+  assign timer_enable = rst_n && !CS1 && !CS2 && IOT_SELECT && A[2];
+  assign io_enable = rst_n && !CS1 && !CS2 && IOT_SELECT && !A[2];
 
   ram ram0 (
     .clk(phi2),
@@ -158,9 +161,9 @@
       DO <= ram_do;
     end else if (rom_enable)
       DO <= rom_do;
-    else if (IOT_SELECT && A[2])
+    else if (timer_enable)
       DO <= timer_do;
-    else if (IOT_SELECT && !A[2])
+    else if (io_enable)
       DO <= io_do;
   end;
 
