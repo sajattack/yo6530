@@ -18,12 +18,13 @@ int main(int argc, char** argv) {
     trace = new VerilatedVcdC;
     top->trace(trace, 99);
     trace->open("Vverilator_top.vcd");
-    tickcount++;
+
     top->RES = true;
     top->PHI2 = false;
     top->eval();
     trace->dump(10*tickcount);
     tickcount++;
+
     top->RES = false;
     top->PHI2 = true;
     top->eval();
@@ -31,6 +32,7 @@ int main(int argc, char** argv) {
     tickcount++;
 
     top->RES = true;
+    top->PHI2 = false;
     top->R_W = false;
     top->RS0 = false;
     top->CS2_PB5 = false;
@@ -39,14 +41,18 @@ int main(int argc, char** argv) {
     trace->dump(10*tickcount);
     tickcount++;
 
-    top->addr = 896;
+    top->addr = 0; 
+    top->PHI2 = true;
     top->eval();
     trace->dump(10*tickcount);
     tickcount++;
 
     for (int i=0; i<10000; i++) {
         top->PHI2 = !(top->PHI2);
-        top->addr = top->addr+1;
+        if (i%10==0)
+        {
+            top->addr = top->addr+1;
+        }
         top->eval();
         trace->dump(10*tickcount);
         tickcount++;

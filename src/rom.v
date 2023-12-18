@@ -1,4 +1,5 @@
 module rom(
+  //input enabled,
   input clk,
   input [9:0] A,
   output reg OE,
@@ -11,8 +12,9 @@ module rom(
 
   initial $readmemh(ROM_FILE, ROM1K);
 
-  always_ff @(posedge clk) begin
-    {OE, DO} <= {1'b1, ROM1K[A]};
+  always @(posedge clk) begin
+    //if (enabled)
+      {OE, DO} = {1'b1, ROM1K[A]};
   end
 
 endmodule

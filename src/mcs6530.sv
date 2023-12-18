@@ -27,15 +27,21 @@
 
   reg[7:0] rom_do;
   reg[7:0] ram_do;
-  reg[7:0] ram_di;
   reg[7:0] io_do;
   reg[7:0] timer_do;
+  reg rom_oe;
+  reg ram_oe;
+  reg io_oe;
+  reg timer_oe;
 
   assign CS1 = PBI[6];
   assign CS2 = PBI[5];
 
-  parameter IOT_BASE = 'h1700;
- 
+  // bruteforce address decoding
+  parameter IOT_BASE = 10'h0;
+  logic IOT_SELECT;
+  assign IOT_SELECT = !CS1 && (A[9:6] == IOT_BASE[9:6]);
+
 
   // When a pin is set to an output (direction = 1), make sure
   // the output data is read as such
@@ -48,18 +54,7 @@
     end
   endgenerate
 
-
-  logic IOT_SELECT;
-  assign IOT_SELECT = !CS1 && (A[9:6] == IOT_BASE[9:6]);
-
-
-  // Memories
-  reg [7:0] RAM64[63];
-
-
-
   always_ff @(posedge phi2) begin
-      //{OE, DO} <= {1'b0, 8'bxxxxxxxx};
       // reset logic
       if (~rst_n) begin
           PAO  <= 8'd0;
@@ -79,13 +74,13 @@
             we_n, A[2:0]
           })
             4'b0_000: PAO <= DI;  // Write port A
-            4'b1_000: {OE, io_do} <= {1'b1, PAI_int};  // Read port A
+            4'b1_000: {io_oe, io_do} <= {1'b1, PAI_int};  // Read port A
             4'b0_001: DDRA <= DI;  // Write DDRA
-            4'b1_001: {OE, io_do} <= {1'b1, DDRA};  // Read DDRA
+            4'b1_001: {io_oe, io_do} <= {1'b1, DDRA};  // Read DDRA
             4'b0_010: PBO <= DI;  // Write port B
-            4'b1_010: {OE, io_do} <= {1'b1, PBI_int};  // Read port B
+            4'b1_010: {io_oe, io_do} <= {1'b1, PBI_int};  // Read port B
             4'b0_011: DDRB <= DI;  // Write DDRB
-            4'b1_011: {OE, io_do} <= {1'b1, DDRB};  // Read DDRB
+            4'b1_011: {io_oe, io_do} <= {1'b1, DDRB};  // Read DDRB
             default:  ;
           endcase
 
@@ -134,37 +129,42 @@
   wire io_enable;
 
   assign ram_enable = rst_n && !CS1 && RS_n && !CS2 && !IOT_SELECT;
-  assign rom_enable = rst_n && !CS1 && !RS_n && !CS2 && !IOT_SELECT;
-  assign timer_enable = rst_n && !CS1 && !CS2 && IOT_SELECT && A[2];
-  assign io_enable = rst_n && !CS1 && !CS2 && IOT_SELECT && !A[2];
+  assign rom_enable = rst_n && !CS1 && !RS_n && !CS2;
+  assign timer_enable = rst_n && !CS1 && RS_n && !CS2 && IOT_SELECT && A[2];
+  assign io_enable = rst_n && !CS1 && !CS2 && RS_n && IOT_SELECT && !A[2];
 
   ram ram0 (
     .clk(phi2),
     .we_n(we_n),
     .A(A),
-    .DI(ram_di),
+    .DI(DI),
     .DO(ram_do),
-    .OE(OE)
+    .OE(ram_oe)
   );
 
   rom rom0 (
     .clk(phi2),
     .A(A),
     .DO(rom_do),
-    .OE(OE)
+    .OE(rom_oe)
   );
 
-  // This is probably wrong and might break timing
-  always_ff @(posedge phi2) begin
+  always_comb begin
     if (ram_enable) begin
-      ram_di <= DI;
-      DO <= ram_do;
-    end else if (rom_enable)
-      DO <= rom_do;
-    else if (timer_enable)
-      DO <= timer_do;
-    else if (io_enable)
-      DO <= io_do;
+      DO = ram_do;
+      OE = ram_oe;
+    end else if (rom_enable) begin
+      DO = rom_do;
+      OE = rom_oe;
+    end else if (timer_enable) begin
+      DO = timer_do;
+      OE = timer_oe;
+    end else if (io_enable) begin
+      DO = io_do;
+      OE = io_oe;
+    end else begin
+      {OE, DO} = {1'b0, 8'bxxxxxxxx};
+    end
   end;
 
 
