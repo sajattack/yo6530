@@ -43,14 +43,16 @@ module verilator_top(
   input PHI2,
   input RES,
 
+  input [7:0] data_i,
+  output reg [7:0] data_o,
   input [9:0] addr,
   output OE
 );
 
 wire we_n;
 
-reg [7:0] data_i;
-reg [7:0] data_o;
+//reg [7:0] data_i;
+//reg [7:0] data_o;
 
 reg [7:0] porta_i;
 reg [7:0] porta_o;
@@ -65,10 +67,10 @@ assign {A9, A8, A7, A6, A5, A4, A3, A2, A1, A0} = addr;
 
 assign we_n = R_W;
 
-assign {DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0} = !we_n ? data_o: 8'bz;
-always_comb begin
-  data_i = we_n ? {DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0}: 8'bz;
-end
+assign {DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0} = we_n ? data_o: 8'bz;
+/*always_comb begin
+  data_i = !we_n ? {DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0}: 8'bz;
+end*/
 
 assign PA7 = ddra[7] ? porta_o[7]: 1'bz;
 assign PA6 = ddra[6] ? porta_o[6]: 1'bz;

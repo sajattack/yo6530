@@ -12,6 +12,10 @@ double sc_time_stamp() {
 }
 
 void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
+    top->R_W = true;
+    top->RS0 = false;
+    top->CS2_PB5 = false;
+    top->CS1_PB6 = false;
     for (int i=0; i<10000; i++) {
         top->PHI2 = !(top->PHI2);
         if (i%10==0)
@@ -25,7 +29,63 @@ void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
 }
 
 void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
-    
+    top->R_W = true;
+    top->RS0 = true;
+    top->CS2_PB5 = false;
+    top->CS1_PB6 = true;
+
+    for (int i=0; i<10; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+
+    top->addr = 193;
+    top->R_W = true;
+
+    for (int i=0; i<2; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+
+    top->data_i = 0x55;
+
+    for (int i=0; i<4; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+    top->R_W = false; 
+
+    for (int i=0; i<10; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+    top->addr = 0;
+    top->R_W = true;
+
+    for (int i=0; i<10; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+    assert(top->data_o != 0x55);
+
+    top->addr = 193;
+    for (int i=0; i<10; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+    assert(top->data_o == 0x55);
 }
 
 void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
@@ -43,7 +103,7 @@ int main(int argc, char** argv) {
     trace = new VerilatedVcdC;
     top->trace(trace, 99);
     trace->open("Vverilator_top.vcd");
-
+    top->R_W = true;
     top->RES = true;
     top->PHI2 = false;
     top->eval();
@@ -58,10 +118,6 @@ int main(int argc, char** argv) {
 
     top->RES = true;
     top->PHI2 = false;
-    top->R_W = false;
-    top->RS0 = false;
-    top->CS2_PB5 = false;
-    top->CS1_PB6 = false;
     top->eval();
     trace->dump(10*tickcount);
     tickcount++;
