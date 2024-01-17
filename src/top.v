@@ -169,7 +169,7 @@ mcs6530 mcs6530 (
   .DI(data_i),
   .DO(data_o),
   .OE(OE),
-  .RS_n(RS0),
+  .RS0(RS0),
   .PAO(porta_o),
   .PAI(porta_i),
   .PBO(portb_o),
