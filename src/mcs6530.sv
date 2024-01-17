@@ -40,7 +40,7 @@
   // bruteforce address decoding
   parameter IOT_BASE = 10'h0;
   logic IOT_SELECT;
-  assign IOT_SELECT = !CS1 && (A[9:6] == IOT_BASE[9:6]);
+  assign IOT_SELECT = (A[9:6] == 0'b000);
 
 
   // When a pin is set to an output (direction = 1), make sure
@@ -128,10 +128,10 @@
   wire timer_enable;
   wire io_enable;
 
-  assign ram_enable = rst_n && !CS1 && RS_n && !CS2 && !IOT_SELECT;
-  assign rom_enable = rst_n && !CS1 && !RS_n && !CS2;
-  assign timer_enable = rst_n && !CS1 && RS_n && !CS2 && IOT_SELECT && A[2];
-  assign io_enable = rst_n && !CS1 && !CS2 && RS_n && IOT_SELECT && !A[2];
+  assign ram_enable = rst_n && !CS1 && RS_n && !A[9] && A[7] && A[6];
+  assign rom_enable = rst_n && CS1 && !RS_n;
+  assign timer_enable = rst_n && !CS1 && RS_n && IOT_SELECT && A[2];
+  assign io_enable = rst_n && !CS1 && RS_n && IOT_SELECT && !A[2];
 
   ram ram0 (
     .clk(phi2),

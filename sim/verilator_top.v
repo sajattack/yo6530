@@ -46,7 +46,13 @@ module verilator_top(
   input [7:0] data_i,
   output reg [7:0] data_o,
   input [9:0] addr,
-  output OE
+  output OE,
+
+
+  output reg [7:0] porta_o,
+  output reg [7:0] portb_o,
+  output reg [7:0] ddra,
+  output reg [7:0] ddrb
 );
 
 wire we_n;
@@ -55,14 +61,8 @@ wire we_n;
 //reg [7:0] data_o;
 
 reg [7:0] porta_i;
-reg [7:0] porta_o;
 
 reg [7:0] portb_i;
-reg [7:0] portb_o;
-
-reg [7:0] ddra;
-reg [7:0] ddrb;
-
 assign {A9, A8, A7, A6, A5, A4, A3, A2, A1, A0} = addr;
 
 assign we_n = R_W;
