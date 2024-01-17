@@ -6,7 +6,7 @@
     input  [7:0] DI,     // Data from processor
     output reg [7:0] DO, // Data to processor
     output       OE,     // Indicates data driven on DO
-    input        RS_n,   // Active-low ROM select
+    input        RS0,    // ROM select
     output reg [7:0] PAO,    // port A output
     input  [7:0] PAI,    // port A input
     output reg [7:0] PBO,    // port B output
@@ -15,8 +15,8 @@
     output reg [7:0] DDRB   // port B OE (data direction register)
 );
 
-  wire CS1;
-  wire CS2;
+  logic CS1;
+  logic CS2;
   reg irq_n;
 
   logic timer_irq_en;
@@ -34,13 +34,6 @@
   reg io_oe;
   reg timer_oe;
 
-  assign CS1 = PBI[6];
-  assign CS2 = PBI[5];
-
-  // bruteforce address decoding
-  parameter IOT_BASE = 10'h0;
-  logic IOT_SELECT;
-  assign IOT_SELECT = (A[9:6] == 0'b000);
 
 
   // When a pin is set to an output (direction = 1), make sure
@@ -53,6 +46,26 @@
       assign PBI_int[i] = DDRB[i] ? PBO[i] : PBI[i];
     end
   endgenerate
+
+  assign CS1 = PBI_int[6];
+  assign CS2 = PBI_int[5];
+
+
+  // bruteforce address decoding
+  //parameter IOT_BASE = 10'h0;
+
+  logic ram_enable;
+  logic rom_enable;
+  logic timer_enable;
+  logic io_enable;
+
+  always_comb begin
+      rom_enable = rst_n & RS0 & CS1;
+      ram_enable = rst_n & !RS0 & !CS1 & !A[9] & A[7] & A[6];
+      timer_enable = rst_n & !RS0 & !CS1 & A[9] & A[8] & A[7] & A[6] & A[2];
+      io_enable = rst_n & !RS0 & !CS1 & A[9] & A[8] & A[7] & A[6] & !A[2];
+  end
+
 
   always_ff @(posedge phi2) begin
       // reset logic
@@ -69,7 +82,7 @@
       end
 
       // io port logic
-      else if (IOT_SELECT)
+      else if (io_enable) begin
           case ({
             we_n, A[2:0]
           })
@@ -83,24 +96,15 @@
             4'b1_011: {io_oe, io_do} <= {1'b1, DDRB};  // Read DDRB
             default:  ;
           endcase
+      end
 
       //timer logic
-      if (timer_count == timer_divider) begin
-        timer <= timer - 1;
-        timer_count <= 0;
-          if (timer == 8'd0) begin
-            timer_divider <= 10'd0;
-            timer_irq <= 1'd1;
-          end
-      end else
 
-      if (!CS1) // chip active
-        if (A[2]) // timer select
+      else if (timer_enable) begin // timer select
           if (~we_n) begin// write
             timer_irq_en <= A[3];
             timer_irq <= 0;
             timer <= DI -1;
-            timer_count <= 0;
               // write divider based on address lines
               case (A[1:0])
                 2'b00: timer_divider <= 10'd0;
@@ -118,20 +122,20 @@
           end
           else
             timer_do <= {7'd0, timer_irq};
+      end
 
-        timer_count <= timer_count + 1;
-        PBO[7] <= ~(timer_irq & timer_irq_en);
+      if (timer_count == timer_divider) begin
+          timer <= timer - 1;
+          timer_count <= 0;
+            if (timer == 8'd0) begin
+              timer_divider <= 10'd0;
+              timer_irq <= 1'd1;
+            end
+      end 
+
+      timer_count <= timer_count + 1;
+      PBO[7] <= ~(timer_irq & timer_irq_en);
   end
-
-  wire ram_enable;
-  wire rom_enable;
-  wire timer_enable;
-  wire io_enable;
-
-  assign ram_enable = rst_n && !CS1 && RS_n && !A[9] && A[7] && A[6];
-  assign rom_enable = rst_n && CS1 && !RS_n;
-  assign timer_enable = rst_n && !CS1 && RS_n && IOT_SELECT && A[2];
-  assign io_enable = rst_n && !CS1 && RS_n && IOT_SELECT && !A[2];
 
   ram ram0 (
     .clk(phi2),

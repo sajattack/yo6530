@@ -35,9 +35,9 @@ module verilator_top(
   inout PB2,
   inout PB3,
   inout PB4,
-  inout CS2_PB5,
-  inout CS1_PB6,
-  inout IRQ_PB7,
+  input CS2_PB5,
+  input CS1_PB6,
+  input IRQ_PB7,
   input R_W,
 
   input PHI2,
@@ -81,9 +81,9 @@ assign PA2 = ddra[2] ? porta_o[2]: 1'bz;
 assign PA1 = ddra[1] ? porta_o[1]: 1'bz;
 assign PA0 = ddra[0] ? porta_o[0]: 1'bz;
 
-assign IRQ_PB7 = ddrb[7] ? portb_o[7]: 1'bz;
-assign CS1_PB6 = ddrb[6] ? portb_o[6]: 1'bz;
-assign CS2_PB5 = ddrb[5] ? portb_o[5]: 1'bz;
+//assign IRQ_PB7 = /*ddrb[7] ?*/ portb_o[7]/*: 1'bz*/;
+//assign CS1_PB6 = /*ddrb[6] ?*/ portb_o[6]/*: 1'bz*/;
+//assign CS2_PB5 = /*ddrb[5] ?*/ portb_o[5]/*: 1'bz*/;
 assign PB4 = ddrb[4] ? portb_o[4]: 1'bz;
 assign PB3 = ddrb[3] ? portb_o[3]: 1'bz;
 assign PB2 = ddrb[2] ? portb_o[2]: 1'bz;
@@ -92,11 +92,11 @@ assign PB0 = ddrb[0] ? portb_o[0]: 1'bz;
 
 always_comb begin
   porta_i[7] = !ddra[7] ? PA7: 1'bz;
-  portb_i[7] = !ddrb[7] ? IRQ_PB7: 1'bz;
+  portb_i[7] = /*!ddrb[7] ?*/ IRQ_PB7/*: 1'bz*/;
   porta_i[6] = !ddra[6] ? PA6: 1'bz;
-  portb_i[6] = !ddrb[6] ? CS1_PB6: 1'bz;
+  portb_i[6] = /*!ddrb[6] ?*/ CS1_PB6/*: 1'bz*/;
   porta_i[5] = !ddra[5] ? PA5: 1'bz;
-  portb_i[5] = !ddrb[5] ? CS2_PB5: 1'bz;
+  portb_i[5] = /*!ddrb[5] ?*/ CS2_PB5/*: 1'bz*/;
   porta_i[4] = !ddra[4] ? PA4: 1'bz;
   portb_i[4] = !ddrb[4] ? PB4: 1'bz;
   porta_i[3] = !ddra[3] ? PA3: 1'bz;
@@ -117,7 +117,7 @@ mcs6530 mcs6530 (
   .DI(data_i),
   .DO(data_o),
   .OE(OE),
-  .RS_n(RS0),
+  .RS0(RS0),
   .PAO(porta_o),
   .PAI(porta_i),
   .PBO(portb_o),
