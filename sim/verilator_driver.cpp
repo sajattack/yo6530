@@ -60,8 +60,6 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount++;
     }
 
-    top->addr = 193;
-    top->R_W = true;
 
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
@@ -70,6 +68,20 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount++;
     }
 
+
+    for (int i=0; i<2; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+
+    top->addr = 193;
+    top->R_W = false; 
+    top->PHI2 = !(top->PHI2);
+    top->eval();
+    trace->dump(10*tickcount);
+    tickcount++;
     top->data_i = 0x55;
 
     for (int i=0; i<2; i++) {
@@ -78,14 +90,7 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
         trace->dump(10*tickcount);
         tickcount++;
     }
-    top->R_W = false; 
 
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
     top->data_i = 0;
     top->addr = 0;
     top->R_W = true;
@@ -99,12 +104,10 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     assert(top->data_o != 0x55);
 
     top->addr = 193;
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
+    top->PHI2 = !(top->PHI2);
+    top->eval();
+    trace->dump(10*tickcount);
+    tickcount++;
     assert(top->data_o == 0x55);
 }
 
@@ -120,25 +123,18 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount++;
     }
 
+
+    for (int i=0; i<2; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+
     // write ddra
     top->addr = 0x3c1;
-
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-
     // all outputs
     top->data_i = 255;
-
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
     top->R_W = false; 
 
     for (int i=0; i<2; i++) {
@@ -150,27 +146,10 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
 
     // write pins off/on
     top->addr = 0x3c0;
-
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-
-    top->R_W = true;
-
     // magic value
     top->data_i = 0x55;
-    
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
     top->R_W = false; 
-
+    
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
@@ -197,10 +176,11 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     top->addr = 0x3c0;
     top->R_W = true;
 
+    // should this take 1 clock cycle (i=2) or 0.5 clock cycles (i=1)?
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(2*tickcount);
+        trace->dump(10*tickcount);
         tickcount++;
     }
 
@@ -222,8 +202,9 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
 
     // write timer
     top->addr = 0x3c4;
+    top->R_W = false;
 
-    for (int i=0; i<2; i++) {
+    for (int i=0; i<1; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
         trace->dump(10*tickcount);
@@ -233,16 +214,7 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     // arbitrary
     top->data_i = 123;
 
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-
-    top->R_W = false;
-
-    for (int i=0; i<2; i++) {
+    for (int i=0; i<1; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
         trace->dump(10*tickcount);
