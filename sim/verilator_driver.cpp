@@ -193,6 +193,13 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     top->RS0 = false;
     top->CS1_PB6 = false;
 
+    // write timer
+    top->addr = 0x3c4;
+    top->R_W = false;
+
+    // arbitrary
+    top->data_i = 123;
+
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
@@ -200,36 +207,16 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount++;
     }
 
-    // write timer
-    top->addr = 0x3c4;
-    top->R_W = false;
-
-    for (int i=0; i<1; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-
-    // arbitrary
-    top->data_i = 123;
-
-    for (int i=0; i<1; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-
     top->R_W = true;
-    top->addr = 0x3c4;
-    top->PHI2 = !(top->PHI2);
-    top->eval();
-    
-    trace->dump(10*tickcount);
-    tickcount++;
 
-    //assert(top->data_o == 122);
+    for (int i=0; i<2; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+
+    assert(top->data_o == 122);
 
     for (int i=0; i<2048; i++) {
         top->PHI2 = !(top->PHI2);
@@ -238,8 +225,7 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount++;
     }
 
-    //assert(top->data_o == 121);
-
+    assert(top->data_o == 121);
 }
 
 int main(int argc, char** argv) {

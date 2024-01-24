@@ -129,12 +129,14 @@ module mcs6530 (
       if (timer == 8'd0) begin
         timer_divider <= 10'd0;
         timer_irq <= 1'd1;
-      end else begin
-        timer_count <= timer_count + 1;
-        PBO[7] <= ~(timer_irq & timer_irq_en);
       end
     end
+
+    timer_count <= timer_count + 1;
+    PBO[7] <= ~(timer_irq & timer_irq_en);
+
   end
+
 
   ram ram0 (
       .clk(phi2),
