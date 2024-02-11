@@ -216,6 +216,13 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount++;
     }
 
+    top->addr = 0x3c4;
+    top->PHI2 = !(top->PHI2);
+    top->eval();
+
+    trace->dump(10*tickcount);
+    tickcount++;
+
     assert(top->data_o == 122);
 
     for (int i=0; i<2048; i++) {
