@@ -32,6 +32,8 @@ module mcs6530 (
   reg ram_oe;
   reg io_oe;
   reg timer_oe;
+  //FIXME
+  /* verilator lint_off UNUSEDSIGNAL */
   reg timer_irq;
 
   // bruteforce address decoding
@@ -57,9 +59,6 @@ module mcs6530 (
       DDRA <= 8'd0;
       PBO <= 8'd0;
       DDRB <= 8'd0;
-    end  // io port logic
-    if (timer_enable) begin
-      PBO[7] <= timer_irq;
     end
   end
 
@@ -117,6 +116,7 @@ module mcs6530 (
     end else if (timer_enable) begin
       DO = timer_do;
       OE = timer_oe;
+      //FIXME timer_irq
     end else if (io_enable) begin
       DO = io_do;
       OE = io_oe;

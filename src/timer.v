@@ -43,9 +43,9 @@ module timer (
         DO <= timer;
         OE <= 1'b1;
         if (timer != 0) timer_irq <= 0;
-      end else begin
+      /*end else begin
         DO <= {7'd0, timer_irq};
-        OE <= 1'b0;
+        OE <= 1'b0;*/
       end
     end
 
