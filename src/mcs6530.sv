@@ -16,17 +16,13 @@ module mcs6530 (
 );
 
   logic CS1;
-
   // FIXME Don't understand what this is supposed to be for yet
   /* verilator lint_off UNUSEDSIGNAL */
   logic CS2;
   /* verilator lint_on UNUSEDSIGNAL */
 
-  logic timer_irq_en;
-  logic timer_irq;
-  reg [9:0] timer_divider;
-  reg [9:0] timer_count;
-  reg [7:0] timer;
+  assign CS1 = PBI[6];
+  assign CS2 = PBI[5];
 
   reg [7:0] rom_do;
   reg [7:0] ram_do;
@@ -36,23 +32,7 @@ module mcs6530 (
   reg ram_oe;
   reg io_oe;
   reg timer_oe;
-
-
-
-  // When a pin is set to an output (direction = 1), make sure
-  // the output data is read as such
-  logic [7:0] PAI_int, PBI_int;
-  genvar i;
-  generate
-    for (i = 0; i < 8; i++) begin : gen_inputs
-      assign PAI_int[i] = DDRA[i] ? PAO[i] : PAI[i];
-      assign PBI_int[i] = DDRB[i] ? PBO[i] : PBI[i];
-    end
-  endgenerate
-
-  assign CS1 = PBI_int[6];
-  assign CS2 = PBI_int[5];
-
+  reg timer_irq;
 
   // bruteforce address decoding
   //parameter IOT_BASE = 10'h0;
@@ -77,64 +57,10 @@ module mcs6530 (
       DDRA <= 8'd0;
       PBO <= 8'd0;
       DDRB <= 8'd0;
-      timer <= 8'd0;
-      timer_divider <= 10'd0;
-      timer_count <= 10'd0;
-      timer_irq <= 1'd0;
-      timer_irq_en <= 1'd0;
     end  // io port logic
-    else if (io_enable) begin
-      case ({
-        we_n, A[2:0]
-      })
-        4'b0_000: PAO <= DI;  // Write port A
-        4'b1_000: {io_oe, io_do} <= {1'b1, PAI_int};  // Read port A
-        4'b0_001: DDRA <= DI;  // Write DDRA
-        4'b1_001: {io_oe, io_do} <= {1'b1, DDRA};  // Read DDRA
-        4'b0_010: PBO <= DI;  // Write port B
-        4'b1_010: {io_oe, io_do} <= {1'b1, PBI_int};  // Read port B
-        4'b0_011: DDRB <= DI;  // Write DDRB
-        4'b1_011: {io_oe, io_do} <= {1'b1, DDRB};  // Read DDRB
-        default:  ;
-      endcase
-    end  //timer logic
-
-    else if (timer_enable) begin  // timer select
-      if (~we_n) begin  // write
-        timer_irq_en <= A[3];
-        timer_irq <= 0;
-        timer <= DI - 1;
-        // write divider based on address lines
-        case (A[1:0])
-          2'b00:   timer_divider <= 10'd0;
-          2'b01:   timer_divider <= 10'd7;
-          2'b10:   timer_divider <= 10'd63;
-          2'b11:   timer_divider <= 10'd1023;
-          default: ;
-        endcase
-      end else if (~A[0]) begin
-        timer_irq_en <= A[3];
-        timer_do <= timer;
-        timer_oe <= 1'b1;
-        if (timer != 0) timer_irq <= 0;
-      end else begin
-        timer_do <= {7'd0, timer_irq};
-        timer_oe <= 1'b0;
-      end
+    if (timer_enable) begin
+      PBO[7] <= timer_irq;
     end
-
-    if (timer_count == timer_divider) begin
-      timer <= timer - 1;
-      timer_count <= 0;
-      if (timer == 8'd0) begin
-        timer_divider <= 10'd0;
-        timer_irq <= 1'd1;
-      end
-    end
-
-    timer_count <= timer_count + 1;
-    PBO[7] <= ~(timer_irq & timer_irq_en);
-
   end
 
 
@@ -154,6 +80,33 @@ module mcs6530 (
       .OE (rom_oe)
   );
 
+  timer timer0 (
+      .clk  (phi2),
+      .rst_n  (rst_n),
+      .we_n  (we_n),
+      .A  ({A [ 3 ], A [1:0] }),
+      .DI  (DI),
+      .DO  (timer_do),
+      .OE  (timer_oe),
+      .irq  (timer_irq)
+  );
+
+  io io0 (
+      .clk  (phi2),
+      .we_n  (we_n),
+      .A  (A [2:0] ),
+      .DI  (DI),
+      .DO  (io_do),
+      .PBO (PBO),
+      .PBI (PBI),
+      .PAI (PAI),
+      .PAO (PAO),
+      .DDRA (DDRA),
+      .DDRB (DDRB),
+      .OE  (io_oe)
+  );
+
+
   always_comb begin
     if (ram_enable) begin
       DO = ram_do;
@@ -171,8 +124,6 @@ module mcs6530 (
       {OE, DO} = {1'b0, 8'bxxxxxxxx};
     end
   end
-  ;
-
 
 endmodule
 
