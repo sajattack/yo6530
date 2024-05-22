@@ -12,7 +12,8 @@ module mcs6530 (
     output reg [7:0] PBO,    // port B output
     input      [7:0] PBI,    // port B input
     output reg [7:0] DDRA,   // port A OE (data direction register)
-    output reg [7:0] DDRB    // port B OE (data direction register)
+    output reg [7:0] DDRB,    // port B OE (data direction register)
+    output reg timer_irq
 );
 
   logic CS1;
@@ -34,7 +35,6 @@ module mcs6530 (
   reg timer_oe;
   //FIXME
   /* verilator lint_off UNUSEDSIGNAL */
-  reg timer_irq;
 
   // bruteforce address decoding
   //parameter IOT_BASE = 10'h0;

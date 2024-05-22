@@ -223,16 +223,44 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     trace->dump(10*tickcount);
     tickcount++;
 
+    // test decrement
     assert(top->data_o == 122);
-
     for (int i=0; i<2048; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
         trace->dump(10*tickcount);
         tickcount++;
     }
-
     assert(top->data_o == 121);
+
+    // test irq
+    top->addr = 0x4;
+    top->PB0 = true;
+    top->PB1 = true;
+    top->PB2 = true;
+    top->PB3 = true;
+    top->PB4 = true;
+    top->CS2_PB5 = true;
+    top->CS1_PB6 = true;
+    top->IRQ_PB7 = true;
+    top->R_W = false;
+
+    for (int i=0; i<10; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+
+    top->R_W = true;
+
+    for (int i=0; i<2048*122; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(10*tickcount);
+        tickcount++;
+    }
+    //assert(top->IRQ_PB7==0);
 }
 
 int main(int argc, char** argv) {

@@ -37,7 +37,7 @@ module verilator_top (
     inout PB4,
     input CS2_PB5,
     input CS1_PB6,
-    input IRQ_PB7,
+    inout IRQ_PB7,
     input R_W,
 
     input PHI2,
@@ -56,9 +56,11 @@ module verilator_top (
 );
 
   wire we_n;
+  wire timer_irq;
 
   //reg [7:0] data_i;
   //reg [7:0] data_o;
+
 
   reg [7:0] porta_i;
 
@@ -81,7 +83,7 @@ end*/
   assign PA1 = ddra[1] ? porta_o[1] : 1'bz;
   assign PA0 = ddra[0] ? porta_o[0] : 1'bz;
 
-  //assign IRQ_PB7 = /*ddrb[7] ?*/ portb_o[7]/*: 1'bz*/;
+  assign IRQ_PB7 =  portb_o[7] | timer_irq;
   //assign CS1_PB6 = /*ddrb[6] ?*/ portb_o[6]/*: 1'bz*/;
   //assign CS2_PB5 = /*ddrb[5] ?*/ portb_o[5]/*: 1'bz*/;
   assign PB4 = ddrb[4] ? portb_o[4] : 1'bz;
@@ -92,7 +94,7 @@ end*/
 
   always_comb begin
     porta_i[7] = !ddra[7] ? PA7 : 1'bz;
-    portb_i[7] =  /*!ddrb[7] ?*/ IRQ_PB7  /*: 1'bz*/;
+    portb_i[7] = !ddrb[7] ? IRQ_PB7: 1'bz;
     porta_i[6] = !ddra[6] ? PA6 : 1'bz;
     portb_i[6] =  /*!ddrb[6] ?*/ CS1_PB6  /*: 1'bz*/;
     porta_i[5] = !ddra[5] ? PA5 : 1'bz;
@@ -123,7 +125,8 @@ end*/
       .PBO(portb_o),
       .PBI(portb_i),
       .DDRA(ddra),
-      .DDRB(ddrb)
+      .DDRB(ddrb),
+      .timer_irq(timer_irq)
   );
 
 endmodule
