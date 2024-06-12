@@ -25,7 +25,7 @@ $(BUILD_DIR)/$(PROJ).rpt: $(BUILD_DIR/$(PROJ).asc
 	@mkdir -p $(@D)
 
 obj_dir/Vverilator_top: $(SRCS) sim/verilator_top.v sim/verilator_driver.cpp
-	verilator -cc --top-module verilator_top sim/verilator_top.v src/mcs6530.sv src/ram.v src/rom.v src/timer.v src/io.v -I./src -exe sim/verilator_driver.cpp --trace #-Wall
+	verilator -cc --top-module verilator_top sim/verilator_top.v src/mcs6530.sv src/ram.v src/rom.v src/timer.v src/io.v -I./src -exe sim/verilator_driver.cpp --trace -Wall
 	make -C obj_dir -f Vverilator_top.mk
 
 sim: obj_dir/Vverilator_top
