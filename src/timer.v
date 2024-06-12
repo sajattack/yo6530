@@ -21,14 +21,14 @@ module timer (
       timer <= 8'd0;
       timer_divider <= 10'd0;
       timer_count <= 10'd0;
-      irq <= 1'd0;
+      irq <= 1'd1;
       timer_irq_en <= 1'd0;
     end  // io port logic
 
     else begin
       if (~we_n) begin  // write
         timer_irq_en <= A[2];
-        irq <= 0;
+        //irq <= 0;
         timer <= DI - 1;
         // write divider based on address lines
         case (A[1:0])
@@ -42,7 +42,7 @@ module timer (
         timer_irq_en <= A[2];
         DO <= timer;
         OE <= 1'b1;
-        if (timer != 0) irq <= 0;
+        //if (timer != 0) irq <= 0;
       end else begin
         DO <= {7'd0, ~irq};
         OE <= 1'b0;
@@ -54,15 +54,11 @@ module timer (
       timer_count <= 0;
       if (timer == 8'd0) begin
         timer_divider <= 10'd0;
-        irq <= 1'd1;
+        irq <= ~(timer_irq_en & 1'd1);
       end
     end
 
     timer_count <= timer_count + 1;
-    irq <= ~(irq & timer_irq_en);
-
   end
-
-
 endmodule
 

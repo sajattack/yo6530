@@ -234,7 +234,7 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     assert(top->data_o == 121);
 
     // test irq
-    top->addr = 0x4;
+    top->addr = 0x8;
     top->PB0 = true;
     top->PB1 = true;
     top->PB2 = true;
@@ -243,7 +243,7 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     top->CS2_PB5 = true;
     top->CS1_PB6 = true;
     top->IRQ_PB7 = true;
-    top->R_W = false;
+    top->R_W = true;
 
     for (int i=0; i<10; i++) {
         top->PHI2 = !(top->PHI2);
@@ -254,13 +254,13 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
 
     top->R_W = true;
 
-    for (int i=0; i<2048*122; i++) {
+    for (int i=0; i<2048*122-42; i++) { // time it takes for timer_count to be 0
         top->PHI2 = !(top->PHI2);
         top->eval();
         trace->dump(10*tickcount);
         tickcount++;
     }
-    //assert(top->IRQ_PB7==0);
+    assert(top->IRQ_PB7==0);
 }
 
 int main(int argc, char** argv) {
