@@ -1,5 +1,5 @@
 ## Dependencies
-- FPGA Toolchain: https://github.com/YosysHQ/oss-cad-suite-build/releases/tag/2024-08-04
+- FPGA Toolchain: https://github.com/YosysHQ/oss-cad-suite-build
 - Simulator: https://verilator.org/guide/latest/install.html
 - C++ toolchain: gcc and gnu make
 - Trace Viewer: https://gtkwave.sourceforge.net/
