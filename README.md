@@ -6,3 +6,6 @@
 - SPI flash programmer: https://www.flashrom.org/
 - Linter: https://github.com/chipsalliance/verible
 - Hardware research in dwfpy directory uses a Digilent Digital Discovery, python and the dwfpy library to probe and stimulate a MOS6532, for understanding expected behaviour from real hardware
+
+## Target Hardware
+https://github.com/daglem/redip-riot
