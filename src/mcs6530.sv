@@ -36,6 +36,8 @@ module mcs6530 (
   reg io_oe;
   reg timer_oe;
   //FIXME
+  // I think this was something to do with different addresses for
+  // the two chips in the KIM-1. Not sure if we need it anymore.
   //parameter IOT_BASE = 10'h0;
 
   logic ram_enable;
