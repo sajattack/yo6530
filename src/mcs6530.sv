@@ -18,6 +18,8 @@ module mcs6530 (
 
   logic CS1;
   // FIXME Don't understand what this is supposed to be for yet
+  // Like obviously chip selects, but why are there 2 of them
+  // needs more digging into the datasheet
   /* verilator lint_off UNUSEDSIGNAL */
   logic CS2;
   /* verilator lint_on UNUSEDSIGNAL */
@@ -34,9 +36,6 @@ module mcs6530 (
   reg io_oe;
   reg timer_oe;
   //FIXME
-  /* verilator lint_off UNUSEDSIGNAL */
-
-  // bruteforce address decoding
   //parameter IOT_BASE = 10'h0;
 
   logic ram_enable;
@@ -116,7 +115,6 @@ module mcs6530 (
     end else if (timer_enable) begin
       DO = timer_do;
       OE = timer_oe;
-      //FIXME timer_irq
     end else if (io_enable) begin
       DO = io_do;
       OE = io_oe;

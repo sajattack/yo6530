@@ -129,6 +129,12 @@ module top (
       .D_OUT_0          (porta_o)
   );
 
+  // TODO: this should probably go in the mcs6530.sv file
+  // ALSO need to figure out if there's any muxing based on
+  // address lines etc.
+  //logic [7:0] portb_Int;
+  //assign portb_Int = portb_o | {irq_n, cs1, cs2, 0, 0, 0, 0, 0};
+
   // Bidirectional io port B. Registered input and output enable.
   SB_IO #(
       .PIN_TYPE(6'b1110_10)
@@ -142,7 +148,7 @@ module top (
       .OUTPUT_CLK       (phi2_io),
       .OUTPUT_ENABLE    (ddrb),
       .D_IN_0           (portb_i),
-      .D_OUT_0          (portb_o), //| {irq_n, 0, 0, 0, 0, 0, 0, 0})
+      .D_OUT_0          (portb_o)
   );
 
 

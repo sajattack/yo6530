@@ -21,14 +21,15 @@ module timer (
       timer <= 8'd0;
       timer_divider <= 10'd0;
       timer_count <= 10'd0;
-      irq <= 1'd1;
-      timer_irq_en <= 1'd0;
-    end  // io port logic
+      irq <= 1'd1; // high means not interrupt
+      timer_irq_en <= 1'd0; // low means interrupt disabled
+    end 
 
     else begin
-      if (~we_n) begin  // write
-        timer_irq_en <= A[2];
-        //irq <= 0;
+      if (~we_n) begin  
+        timer_irq_en <= A[2]; // does this go here? why is it here and also below
+        // write timer counter
+        // I forget why this is -1, but it probably says in the datasheet
         timer <= DI - 1;
         // write divider based on address lines
         case (A[1:0])
@@ -39,25 +40,32 @@ module timer (
           default: ;
         endcase
       end else if (~A[0]) begin
+        // read timer counter
         timer_irq_en <= A[2];
         DO <= timer;
         OE <= 1'b1;
-        //if (timer != 0) irq <= 0;
       end else begin
-        DO <= {7'd0, ~irq};
+        //DO <= {7'd0, ~irq}; // I think this is backwards or at least inconsistent
+        DO <= {irq, 7'd0}; // read irq
         OE <= 1'b0;
       end
     end
 
+    // decrement the timer when the divider rolls over
     if (timer_count == timer_divider) begin
       timer <= timer - 1;
       timer_count <= 0;
       if (timer == 8'd0) begin
-        timer_divider <= 10'd0;
-        irq <= ~(timer_irq_en & 1'd1);
+        //timer_divider <= 10'd0; // why is this here?
+        // I think I was trying to prevent it running to infinity - but instead this 
+        // wipes out the divider the user chose
+        // also this doesn't actually increment ever so that doesn't make sense
+        irq <= ~(timer_irq_en & 1'd1); // trigger irq if enabled when timer reaches 0
       end
     end
 
+    // increment the count
+    // note it will be reset to 0 once it reaches the divider value
     timer_count <= timer_count + 1;
   end
 endmodule
