@@ -6,13 +6,13 @@ module mcs6530 (
     input      [7:0] DI,     // Data from processor
     output reg [7:0] DO,     // Data to processor
     output           OE,     // Indicates data driven on DO
-    input            RS0,    // ROM select
+    input            RS0,    // ROM select, might need to be inverted?
     output reg [7:0] PAO,    // port A output
     input      [7:0] PAI,    // port A input
     output reg [7:0] PBO,    // port B output
     input      [7:0] PBI,    // port B input
     output reg [7:0] DDRA,   // port A OE (data direction register)
-    output reg [7:0] DDRB,    // port B OE (data direction register)
+    output reg [7:0] DDRB,   // port B OE (data direction register)
     output reg timer_irq
 );
 
