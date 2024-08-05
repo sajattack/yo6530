@@ -5,7 +5,7 @@ module rom (
     output reg [7:0] DO
 );
 
-  parameter ROM_FILE = "roms/6530-003.hex";
+  parameter ROM_FILE = "roms/6530-002.hex";
 
   reg [7:0] ROM1K[1024];
 

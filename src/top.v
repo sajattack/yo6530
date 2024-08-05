@@ -142,7 +142,7 @@ module top (
       .OUTPUT_CLK       (phi2_io),
       .OUTPUT_ENABLE    (ddrb),
       .D_IN_0           (portb_i),
-      .D_OUT_0          (portb_o | {irq_n, 0, 0, 0, 0, 0, 0, 0})
+      .D_OUT_0          (portb_o), //| {irq_n, 0, 0, 0, 0, 0, 0, 0})
   );
 
 
