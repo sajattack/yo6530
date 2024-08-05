@@ -35,3 +35,10 @@ truncate -s 128K mcs6530.bin # pad the rom to 128K
 flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=20000 -w mcs6530.bin # write the flash
 pinctrl set 24 ip pu # exit programming mode by returning creset to input pullup
 ```
+
+## Building and running the simulation tests
+```sh
+make sim
+./obj_dir/Vverilator_top # this will throw assertion errors if the tests fail
+```
+Also you can examine the logic signals output during the test in the Vverilator_top.vcd file using [GTKWave](https://gtkwave.sourceforge.net/)
