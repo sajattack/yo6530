@@ -111,157 +111,157 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     assert(top->data_o == 0x55);
 }
 
-void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
-    top->R_W = true;
-    top->RS0 = false;
-    top->CS1_PB6 = false;
+//void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
+    //top->R_W = true;
+    //top->RS0 = false;
+    //top->CS1_PB6 = false;
 
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
+    //for (int i=0; i<2; i++) {
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
 
 
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
+    //for (int i=0; i<2; i++) {
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
 
-    // write ddra
-    top->addr = 0x3c1;
-    // all outputs
-    top->data_i = 255;
-    top->R_W = false; 
+    //// write ddra
+    //top->addr = 0x3c1;
+    //// all outputs
+    //top->data_i = 255;
+    //top->R_W = false; 
 
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
+    //for (int i=0; i<2; i++) {
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
 
-    // write pins off/on
-    top->addr = 0x3c0;
-    // magic value
-    top->data_i = 0x55;
-    top->R_W = false; 
+    //// write pins off/on
+    //top->addr = 0x3c0;
+    //// magic value
+    //top->data_i = 0x55;
+    //top->R_W = false; 
     
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
+    //for (int i=0; i<2; i++) {
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
 
-    top->R_W = true;
+    //top->R_W = true;
 
-    // move to an arbitrary other address, read
-    top->addr = 200;
-    top->R_W = true;
+    //// move to an arbitrary other address, read
+    //top->addr = 200;
+    //top->R_W = true;
 
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
+    //for (int i=0; i<2; i++) {
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
 
-    assert(top->data_o != 0x55);
+    //assert(top->data_o != 0x55);
 
-    // move back to porta, read
-    top->addr = 0x3c0;
-    top->R_W = true;
+    //// move back to porta, read
+    //top->addr = 0x3c0;
+    //top->R_W = true;
 
-    // should this take 1 clock cycle (i=2) or 0.5 clock cycles (i=1)?
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
+    //// should this take 1 clock cycle (i=2) or 0.5 clock cycles (i=1)?
+    //for (int i=0; i<2; i++) {
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
 
-    assert(top->data_o == 0x55);
-    assert(top->porta_o == 0x55); 
-}
+    //assert(top->data_o == 0x55);
+    //assert(top->porta_o == 0x55); 
+//}
 
-void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
-    top->R_W = true;
-    top->RS0 = false;
-    top->CS1_PB6 = false;
+//void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
+    //top->R_W = true;
+    //top->RS0 = false;
+    //top->CS1_PB6 = false;
 
-    // write timer
-    top->addr = 0x3c4;
-    top->R_W = false;
+    //// write timer
+    //top->addr = 0x3c4;
+    //top->R_W = false;
 
-    // arbitrary
-    top->data_i = 123;
+    //// arbitrary
+    //top->data_i = 123;
 
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
+    //for (int i=0; i<2; i++) {
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
 
-    top->R_W = true;
+    //top->R_W = true;
 
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
+    //for (int i=0; i<2; i++) {
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
 
-    top->addr = 0x3c4;
-    top->PHI2 = !(top->PHI2);
-    top->eval();
+    //top->addr = 0x3c4;
+    //top->PHI2 = !(top->PHI2);
+    //top->eval();
 
-    trace->dump(10*tickcount);
-    tickcount++;
+    //trace->dump(10*tickcount);
+    //tickcount++;
 
-    // test decrement
-    assert(top->data_o == 122);
-    for (int i=0; i<2048; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-    assert(top->data_o == 121);
+    //// test decrement
+    //assert(top->data_o == 122);
+    //for (int i=0; i<2048; i++) {
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
+    //assert(top->data_o == 121);
 
-    // test irq
-    top->addr = 0x8;
-    top->PB0 = true;
-    top->PB1 = true;
-    top->PB2 = true;
-    top->PB3 = true;
-    top->PB4 = true;
-    top->CS2_PB5 = true;
-    top->CS1_PB6 = true;
-    top->IRQ_PB7 = true;
-    top->R_W = true;
+    //// test irq
+    //top->addr = 0x8;
+    //top->PB0 = true;
+    //top->PB1 = true;
+    //top->PB2 = true;
+    //top->PB3 = true;
+    //top->PB4 = true;
+    ////top->CS2_PB5 = true;
+    //top->CS1_PB6 = true;
+    ////top->IRQ_PB7 = true;
+    //top->R_W = true;
 
-    for (int i=0; i<10; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
+    //for (int i=0; i<10; i++) {
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
 
-    top->R_W = true;
+    //top->R_W = true;
 
-    for (int i=0; i<2048*122-42; i++) { // time it takes for timer_count to be 0
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-    assert(top->IRQ_PB7==0);
-}
+    //for (int i=0; i<2048*122-42; i++) { // time it takes for timer_count to be 0
+        //top->PHI2 = !(top->PHI2);
+        //top->eval();
+        //trace->dump(10*tickcount);
+        //tickcount++;
+    //}
+    //assert(top->IRQ_PB7==0);
+//}
 
 int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
@@ -297,8 +297,8 @@ int main(int argc, char** argv) {
 
     check_rom(top, trace);
     check_ram(top, trace);
-    check_io(top, trace);
-    check_timer(top, trace);
+    //check_io(top, trace);
+    //check_timer(top, trace);
 
     trace->close();
     delete trace;
