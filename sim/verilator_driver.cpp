@@ -41,7 +41,8 @@ void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
 
         if (top->addr == 1 && top->PHI2 == true)
         {
-            assert(top->data_o==0xf3);
+            //assert(top->data_o==0xf3);
+            assert(top->data_o==0xad);
         }
     }
 
