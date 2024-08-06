@@ -93,22 +93,22 @@ end*/
   //assign PB0 = ddrb[0] ? portb_o[0] : 1'bz;
 
   //always_comb begin
-    //porta_i[7] = !ddra[7] ? PA7 : 1'bz;
-    //portb_i[7] = !ddrb[7] ? IRQ_PB7: 1'bz;
-    //porta_i[6] = !ddra[6] ? PA6 : 1'bz;
-    //portb_i[6] =  [>!ddrb[6] ?*/ CS1_PB6  /*: 1'bz<];
-    //porta_i[5] = !ddra[5] ? PA5 : 1'bz;
-    //portb_i[5] =  [>!ddrb[5] ?*/ CS2_PB5  /*: 1'bz<];
-    //porta_i[4] = !ddra[4] ? PA4 : 1'bz;
-    //portb_i[4] = !ddrb[4] ? PB4 : 1'bz;
-    //porta_i[3] = !ddra[3] ? PA3 : 1'bz;
-    //portb_i[3] = !ddrb[3] ? PB3 : 1'bz;
-    //porta_i[2] = !ddra[2] ? PA2 : 1'bz;
-    //portb_i[2] = !ddrb[2] ? PB2 : 1'bz;
-    //porta_i[1] = !ddra[1] ? PA1 : 1'bz;
-    //portb_i[1] = !ddrb[1] ? PB1 : 1'bz;
-    //porta_i[0] = !ddra[0] ? PA0 : 1'bz;
-    //portb_i[0] = !ddrb[0] ? PB0 : 1'bz;
+  //porta_i[7] = !ddra[7] ? PA7 : 1'bz;
+  //portb_i[7] = !ddrb[7] ? IRQ_PB7: 1'bz;
+  //porta_i[6] = !ddra[6] ? PA6 : 1'bz;
+  //portb_i[6] =  [>!ddrb[6] ?*/ CS1_PB6  /*: 1'bz<];
+  //porta_i[5] = !ddra[5] ? PA5 : 1'bz;
+  //portb_i[5] =  [>!ddrb[5] ?*/ CS2_PB5  /*: 1'bz<];
+  //porta_i[4] = !ddra[4] ? PA4 : 1'bz;
+  //portb_i[4] = !ddrb[4] ? PB4 : 1'bz;
+  //porta_i[3] = !ddra[3] ? PA3 : 1'bz;
+  //portb_i[3] = !ddrb[3] ? PB3 : 1'bz;
+  //porta_i[2] = !ddra[2] ? PA2 : 1'bz;
+  //portb_i[2] = !ddrb[2] ? PB2 : 1'bz;
+  //porta_i[1] = !ddra[1] ? PA1 : 1'bz;
+  //portb_i[1] = !ddrb[1] ? PB1 : 1'bz;
+  //porta_i[0] = !ddra[0] ? PA0 : 1'bz;
+  //portb_i[0] = !ddrb[0] ? PB0 : 1'bz;
   //end
 
   mcs6530 mcs6530 (

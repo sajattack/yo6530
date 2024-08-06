@@ -10,7 +10,7 @@ module top (
     inout A8,
     inout A9,
 
-    inout RS0,
+    input RS0,
 
     inout DB0,
     inout DB1,
@@ -36,12 +36,12 @@ module top (
     inout PB3,
     inout PB4,
     inout CS2_PB5,
-    inout CS1_PB6,
+    input CS1_PB6,
     inout IRQ_PB7,
     input R_W,
 
-    inout PHI2,
-    inout RES
+    input PHI2,
+    input RES
 );
 
   wire we_n;
@@ -50,7 +50,7 @@ module top (
   wire phi2_io;
   wire phi1_io = ~phi2_io;
   wire OE;
-  
+
   wire CS1;
 
   wire [7:0] data_i;
@@ -121,18 +121,32 @@ module top (
   SB_IO #(
       .PIN_TYPE(6'b1100_00)
   ) io_porta[7:0] (
-      .PACKAGE_PIN      ({PA7, PA6, PA5, PA4, PA3, PA2, PA1, PA0}),
+      .PACKAGE_PIN  ({PA7, PA6, PA5, PA4, PA3, PA2, PA1, PA0}),
+`ifdef VERILATOR
+      .CLOCK_ENABLE (1'b1),
+`endif
+      .INPUT_CLK    (phi2_io),
+      .OUTPUT_CLK   (phi2_io),
+      .OUTPUT_ENABLE(1'b0),
+
   );
 
-// IO PORT B High Impedance
+  // IO PORT B High Impedance
   SB_IO #(
       .PIN_TYPE(6'b1100_00)
   ) io_portb[6:0] (
-      .PACKAGE_PIN      ({PB7_IRQ, PB5_CS2, PB4, PB3, PB2, PB1, PB0}),
+      .PACKAGE_PIN  ({PB7_IRQ, PB5_CS2, PB4, PB3, PB2, PB1, PB0}),
+`ifdef VERILATOR
+      .CLOCK_ENABLE (1'b1),
+`endif
+      .INPUT_CLK    (phi2_io),
+      .OUTPUT_CLK   (phi2_io),
+      .OUTPUT_ENABLE(1'b0),
+
   );
 
-SB_IO #(
-      .PIN_TYPE(6'b0000_00)
+  SB_IO #(
+      .PIN_TYPE(6'b0000_10)
   ) io_cs1 (
       .PACKAGE_PIN (CS1_PB6),
 `ifdef VERILATOR
@@ -146,18 +160,18 @@ SB_IO #(
 
   // Bidirectional io port A. Registered input and output enable.
   //SB_IO #(
-      //.PIN_TYPE(6'b1110_10)
+  //.PIN_TYPE(6'b1110_10)
   //) io_porta[7:0] (
-      //.PACKAGE_PIN      ({PA7, PA6, PA5, PA4, PA3, PA2, PA1, PA0}),
-      //.LATCH_INPUT_VALUE(phi1_io),
-//`ifdef VERILATOR
-      //.CLOCK_ENABLE     (1'b1),
-//`endif
-      //.INPUT_CLK        (phi2_io),
-      //.OUTPUT_CLK       (phi2_io),
-      //.OUTPUT_ENABLE    (ddra),
-      //.D_IN_0           (porta_i),
-      //.D_OUT_0          (porta_o)
+  //.PACKAGE_PIN      ({PA7, PA6, PA5, PA4, PA3, PA2, PA1, PA0}),
+  //.LATCH_INPUT_VALUE(phi1_io),
+  //`ifdef VERILATOR
+  //.CLOCK_ENABLE     (1'b1),
+  //`endif
+  //.INPUT_CLK        (phi2_io),
+  //.OUTPUT_CLK       (phi2_io),
+  //.OUTPUT_ENABLE    (ddra),
+  //.D_IN_0           (porta_i),
+  //.D_OUT_0          (porta_o)
   //);
 
   //// TODO: this should probably go in the mcs6530.sv file
@@ -168,18 +182,18 @@ SB_IO #(
 
   //// Bidirectional io port B. Registered input and output enable.
   //SB_IO #(
-      //.PIN_TYPE(6'b1110_10)
+  //.PIN_TYPE(6'b1110_10)
   //) io_portb[7:0] (
-      //.PACKAGE_PIN      ({IRQ_PB7, CS1_PB6, CS2_PB5, PB4, PB3, PB2, PB1, PB0}),
-      //.LATCH_INPUT_VALUE(phi1_io),
-//`ifdef VERILATOR
-      //.CLOCK_ENABLE     (1'b1),
-//`endif
-      //.INPUT_CLK        (phi2_io),
-      //.OUTPUT_CLK       (phi2_io),
-      //.OUTPUT_ENABLE    (ddrb),
-      //.D_IN_0           (portb_i),
-      //.D_OUT_0          (portb_o)
+  //.PACKAGE_PIN      ({IRQ_PB7, CS1_PB6, CS2_PB5, PB4, PB3, PB2, PB1, PB0}),
+  //.LATCH_INPUT_VALUE(phi1_io),
+  //`ifdef VERILATOR
+  //.CLOCK_ENABLE     (1'b1),
+  //`endif
+  //.INPUT_CLK        (phi2_io),
+  //.OUTPUT_CLK       (phi2_io),
+  //.OUTPUT_ENABLE    (ddrb),
+  //.D_IN_0           (portb_i),
+  //.D_OUT_0          (portb_o)
   //);
 
 

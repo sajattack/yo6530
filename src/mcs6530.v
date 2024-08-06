@@ -5,7 +5,7 @@ module mcs6530 (
     input      [9:0] A,      // Address
     input      [7:0] DI,     // Data from processor
     output reg [7:0] DO,     // Data to processor
-    output           OE,     // Indicates data driven on DO
+    output reg       OE,     // Indicates data driven on DO
     input            RS0,    // ROM select, might need to be inverted?
     //output reg [7:0] PAO,    // port A output
     //input      [7:0] PAI,    // port A input
@@ -14,7 +14,7 @@ module mcs6530 (
     //output reg [7:0] DDRA,   // port A OE (data direction register)
     //output reg [7:0] DDRB,   // port B OE (data direction register)
     //output reg timer_irq
-    input CS1
+    input            CS1
 );
 
   // FIXME Don't understand what this is supposed to be for yet
@@ -56,10 +56,10 @@ module mcs6530 (
   always_ff @(posedge phi2) begin
     // reset logic
     //if (~rst_n) begin
-      //PAO <= 8'd0;
-      //DDRA <= 8'd0;
-      //PBO <= 8'd0;
-      //DDRB <= 8'd0;
+    //PAO <= 8'd0;
+    //DDRA <= 8'd0;
+    //PBO <= 8'd0;
+    //DDRB <= 8'd0;
     //end
   end
 
@@ -81,29 +81,29 @@ module mcs6530 (
   );
 
   //timer timer0 (
-      //.clk  (phi2),
-      //.rst_n  (rst_n),
-      //.we_n  (we_n),
-      //.A  ({A [ 3 ], A [1:0] }),
-      //.DI  (DI),
-      //.DO  (timer_do),
-      //.OE  (timer_oe),
-      //.irq  (timer_irq)
+  //.clk  (phi2),
+  //.rst_n  (rst_n),
+  //.we_n  (we_n),
+  //.A  ({A [ 3 ], A [1:0] }),
+  //.DI  (DI),
+  //.DO  (timer_do),
+  //.OE  (timer_oe),
+  //.irq  (timer_irq)
   //);
 
   //io io0 (
-      //.clk  (phi2),
-      //.we_n  (we_n),
-      //.A  (A [2:0] ),
-      //.DI  (DI),
-      //.DO  (io_do),
-      //.PBO (PBO),
-      //.PBI (PBI),
-      //.PAI (PAI),
-      //.PAO (PAO),
-      //.DDRA (DDRA),
-      //.DDRB (DDRB),
-      //.OE  (io_oe)
+  //.clk  (phi2),
+  //.we_n  (we_n),
+  //.A  (A [2:0] ),
+  //.DI  (DI),
+  //.DO  (io_do),
+  //.PBO (PBO),
+  //.PBI (PBI),
+  //.PAI (PAI),
+  //.PAO (PAO),
+  //.DDRA (DDRA),
+  //.DDRB (DDRB),
+  //.OE  (io_oe)
   //);
 
 
@@ -114,10 +114,10 @@ module mcs6530 (
     end else if (rom_enable) begin
       DO = rom_do;
       OE = rom_oe;
-    //end else if (timer_enable) begin
+      //end else if (timer_enable) begin
       //DO = timer_do;
       //OE = timer_oe;
-    //end else if (io_enable) begin
+      //end else if (io_enable) begin
       //DO = io_do;
       //OE = io_oe;
     end else begin
