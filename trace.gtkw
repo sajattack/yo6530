@@ -1,0 +1,38 @@
+[*]
+[*] GTKWave Analyzer v3.3.120 (w)1999-2024 BSI
+[*] Tue Aug  6 00:22:43 2024
+[*]
+[dumpfile] "/home/paul/projects/fpga/yo6530/Vverilator_top.vcd"
+[dumpfile_mtime] "Tue Aug  6 00:00:01 2024"
+[dumpfile_size] 4824473
+[savefile] "/home/paul/projects/fpga/yo6530/trace.gtkw"
+[timestart] 0
+[size] 2560 1497
+[pos] -781 -449
+*-18.832529 20730 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.verilator_top.
+[treeopen] TOP.verilator_top.mcs6530.
+[sst_width] 243
+[signals_width] 120
+[sst_expanded] 1
+[sst_vpaned_height] 464
+@22
+TOP.verilator_top.mcs6530.A[9:0]
+TOP.verilator_top.mcs6530.DO[7:0]
+TOP.verilator_top.mcs6530.DI[7:0]
+@28
+TOP.verilator_top.mcs6530.phi2
+@29
+TOP.verilator_top.mcs6530.timer_irq
+@28
+TOP.verilator_top.mcs6530.RS0
+@22
+TOP.verilator_top.mcs6530.PBO[7:0]
+TOP.verilator_top.mcs6530.PAO[7:0]
+@28
+TOP.verilator_top.mcs6530.rst_n
+TOP.verilator_top.mcs6530.we_n
+TOP.verilator_top.mcs6530.OE
+[pattern_trace] 1
+[pattern_trace] 0
