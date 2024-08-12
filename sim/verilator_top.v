@@ -10,7 +10,7 @@ module verilator_top (
     inout A8,
     inout A9,
 
-    inout RS0,
+    input RS0,
 
     inout DB0,
     inout DB1,
@@ -35,8 +35,8 @@ module verilator_top (
     inout PB2,
     inout PB3,
     inout PB4,
-    input CS2_PB5,
-    input CS1_PB6,
+    inout CS2_PB5,
+    input CS1,
     inout IRQ_PB7,
     input R_W,
 
@@ -56,23 +56,27 @@ module verilator_top (
 );
 
   wire we_n;
-  wire timer_irq;
-
-  //reg [7:0] data_i;
-  //reg [7:0] data_o;
-
+  reg irq, irq_en;
 
   reg [7:0] porta_i;
-
+  // verilator lint_off UNDRIVEN
   reg [7:0] portb_i;
+  // verilator lint_on UNDRIVEN
+  
+  
+  // addr is a signal used by the simulation so we don't
+  // have to worry about writing the addresses bit by bit
+  // unfortunately this little hack means we have to declare
+  // the address lines as inouts when really they're inputs
   assign {A9, A8, A7, A6, A5, A4, A3, A2, A1, A0} = addr;
 
   assign we_n = R_W;
 
   assign {DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0} = we_n ? data_o : 8'bzzzzzzzz;
-  /*always_comb begin
-  data_i = !we_n ? {DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0}: 8'bzzzzzzzz;
-end*/
+
+//always_comb begin
+//  data_i = !we_n ? {DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0}: 8'bzzzzzzzz;
+//end
 
   assign PA7 = ddra[7] ? porta_o[7] : 1'bz;
   assign PA6 = ddra[6] ? porta_o[6] : 1'bz;
@@ -83,9 +87,9 @@ end*/
   assign PA1 = ddra[1] ? porta_o[1] : 1'bz;
   assign PA0 = ddra[0] ? porta_o[0] : 1'bz;
 
-  assign IRQ_PB7 =  portb_o[7] | timer_irq;
-  //assign CS1_PB6 = /*ddrb[6] ?*/ portb_o[6]/*: 1'bz*/;
-  //assign CS2_PB5 = /*ddrb[5] ?*/ portb_o[5]/*: 1'bz*/;
+  assign IRQ_PB7 = irq_en ? irq : ddrb[7] ? portb_o[7]: 1'bz;
+  // CS1_PB6 is an input
+  assign CS2_PB5 = ddrb[5] ? portb_o[5]: 1'bz;
   assign PB4 = ddrb[4] ? portb_o[4] : 1'bz;
   assign PB3 = ddrb[3] ? portb_o[3] : 1'bz;
   assign PB2 = ddrb[2] ? portb_o[2] : 1'bz;
@@ -96,9 +100,9 @@ end*/
     porta_i[7] = !ddra[7] ? PA7 : 1'bz;
     portb_i[7] = !ddrb[7] ? IRQ_PB7: 1'bz;
     porta_i[6] = !ddra[6] ? PA6 : 1'bz;
-    portb_i[6] =  /*!ddrb[6] ?*/ CS1_PB6  /*: 1'bz*/;
+    //portb_i[6] = CS1_PB6;
     porta_i[5] = !ddra[5] ? PA5 : 1'bz;
-    portb_i[5] =  /*!ddrb[5] ?*/ CS2_PB5  /*: 1'bz*/;
+    portb_i[5] = !ddrb[5] ? CS2_PB5  : 1'bz;
     porta_i[4] = !ddra[4] ? PA4 : 1'bz;
     portb_i[4] = !ddrb[4] ? PB4 : 1'bz;
     porta_i[3] = !ddra[3] ? PA3 : 1'bz;
@@ -110,6 +114,7 @@ end*/
     porta_i[0] = !ddra[0] ? PA0 : 1'bz;
     portb_i[0] = !ddrb[0] ? PB0 : 1'bz;
   end
+
 
   mcs6530 mcs6530 (
       .phi2(PHI2),
@@ -126,7 +131,9 @@ end*/
       .PBI(portb_i),
       .DDRA(ddra),
       .DDRB(ddrb),
-      .timer_irq(timer_irq)
+      .CS1(CS1),
+      .IRQ(irq),
+      .IRQ_EN(irq_en)
   );
 
 endmodule

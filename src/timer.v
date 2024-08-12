@@ -6,10 +6,10 @@ module timer (
     input      [7:0] DI,     // Data from processor
     output reg [7:0] DO,     // Data to processor
     output           OE,     // Indicates data driven on DO
-    output reg       irq
+    output reg       irq,
+    output reg irq_en
 );
 
-  logic timer_irq_en;
   reg [9:0] timer_divider;
   reg [9:0] timer_count;
   reg [7:0] timer;
@@ -22,12 +22,12 @@ module timer (
       timer_divider <= 10'd0;
       timer_count <= 10'd0;
       irq <= 1'd1; // high means not interrupt
-      timer_irq_en <= 1'd0; // low means interrupt disabled
+      irq_en <= 1'd0; // low means interrupt disabled
     end 
 
     else begin
       if (~we_n) begin  
-        timer_irq_en <= A[2]; // does this go here? why is it here and also below
+        irq_en <= A[2]; // does this go here? why is it here and also below
         // write timer counter
         // I forget why this is -1, but it probably says in the datasheet
         timer <= DI - 1;
@@ -41,7 +41,7 @@ module timer (
         endcase
       end else if (~A[0]) begin
         // read timer counter
-        timer_irq_en <= A[2];
+        irq_en <= A[2];
         DO <= timer;
         OE <= 1'b1;
       end else begin
@@ -60,7 +60,7 @@ module timer (
         // I think I was trying to prevent it running to infinity - but instead this 
         // wipes out the divider the user chose
         // also this doesn't actually increment ever so that doesn't make sense
-        irq <= ~(timer_irq_en & 1'd1); // trigger irq if enabled when timer reaches 0
+        irq <= ~(irq_en & 1'd1); // trigger irq if enabled when timer reaches 0
       end
     end
 

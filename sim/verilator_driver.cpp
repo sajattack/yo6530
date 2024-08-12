@@ -4,6 +4,8 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
+#define MOS6530_003 1;
+
 static VerilatedVcdC *trace = nullptr;
 unsigned long tickcount = 0;
 
@@ -13,8 +15,8 @@ double sc_time_stamp() {
 
 void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
     top->R_W = true;
-    top->RS0 = true;
-    top->CS1_PB6 = true;
+    top->RS0 = false;
+    top->CS1 = true;
     top->addr = 0;
 
     for (int i=0; i<2; i++) {
@@ -41,7 +43,12 @@ void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
 
         if (top->addr == 1 && top->PHI2 == true)
         {
+            #ifdef MOS6530_002
             assert(top->data_o==0xf3);
+            #endif
+            #ifdef MOS6530_003
+            assert(top->data_o==0xad);
+            #endif
         }
     }
 
@@ -50,8 +57,8 @@ void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
 
 void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     top->R_W = true;
-    top->RS0 = false;
-    top->CS1_PB6 = false;
+    top->RS0 = true;
+    top->CS1 = false;
 
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
@@ -76,7 +83,12 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount++;
     }
 
-    top->addr = 193;
+    #ifdef MOS6530_002
+    top->addr = 960;
+    #endif
+    #ifdef MOS6530_003
+    top->addr = 896;
+    #endif
     top->R_W = false; 
     top->PHI2 = !(top->PHI2);
     top->eval();
@@ -103,7 +115,13 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     }
     assert(top->data_o != 0x55);
 
-    top->addr = 193;
+    #ifdef MOS6530_002
+    top->addr = 960;
+    #endif
+    #ifdef MOS6530_003
+    top->addr = 896;
+    #endif
+
     top->PHI2 = !(top->PHI2);
     top->eval();
     trace->dump(10*tickcount);
@@ -113,8 +131,8 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
 
 void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     top->R_W = true;
-    top->RS0 = false;
-    top->CS1_PB6 = false;
+    top->RS0 = true;
+    top->CS1 = false;
 
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
@@ -132,7 +150,14 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     }
 
     // write ddra
-    top->addr = 0x3c1;
+
+    #ifdef MOS6530_002
+    top->addr = 833;
+    #endif
+    #ifdef MOS6530_003
+    top->addr = 769;
+    #endif
+
     // all outputs
     top->data_i = 255;
     top->R_W = false; 
@@ -145,7 +170,14 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     }
 
     // write pins off/on
-    top->addr = 0x3c0;
+
+    #ifdef MOS6530_002
+    top->addr = 832;
+    #endif
+    #ifdef MOS6530_003
+    top->addr = 768;
+    #endif
+
     // magic value
     top->data_i = 0x55;
     top->R_W = false; 
@@ -173,7 +205,13 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     assert(top->data_o != 0x55);
 
     // move back to porta, read
-    top->addr = 0x3c0;
+    #ifdef MOS6530_002
+    top->addr = 832;
+    #endif
+    #ifdef MOS6530_003
+    top->addr = 768;
+    #endif
+
     top->R_W = true;
 
     // should this take 1 clock cycle (i=2) or 0.5 clock cycles (i=1)?
@@ -190,11 +228,17 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
 
 void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     top->R_W = true;
-    top->RS0 = false;
-    top->CS1_PB6 = false;
+    top->RS0 = true;
+    top->CS1 = false;
 
     // write timer
-    top->addr = 0x3c4;
+    #ifdef MOS6530_002
+    top->addr = 836;
+    #endif
+    #ifdef MOS6530_003
+    top->addr = 772;
+    #endif
+
     top->R_W = false;
 
     // arbitrary
@@ -216,7 +260,17 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount++;
     }
 
-    top->addr = 0x3c4;
+    
+    #ifdef MOS6530_002
+    top->addr = 836;
+    #endif
+    #ifdef MOS6530_003
+    top->addr = 772;
+    #endif
+
+
+
+
     top->PHI2 = !(top->PHI2);
     top->eval();
 
@@ -234,14 +288,20 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     assert(top->data_o == 121);
 
     // test irq
-    top->addr = 0x8;
+    #ifdef MOS6530_002
+    top->addr = 844;
+    #endif
+    #ifdef MOS6530_003
+    top->addr = 780;
+    #endif
+
+
     top->PB0 = true;
     top->PB1 = true;
     top->PB2 = true;
     top->PB3 = true;
     top->PB4 = true;
     top->CS2_PB5 = true;
-    top->CS1_PB6 = true;
     top->IRQ_PB7 = true;
     top->R_W = true;
 

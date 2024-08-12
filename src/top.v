@@ -115,7 +115,8 @@ module top (
 
   // Bidirectional io port A. Registered input and output enable.
   SB_IO #(
-      .PIN_TYPE(6'b1110_10)
+      .PIN_TYPE(6'b1110_10),
+      .PULLUP(1'b1)
   ) io_porta[7:0] (
       .PACKAGE_PIN      ({PA7, PA6, PA5, PA4, PA3, PA2, PA1, PA0}),
       .LATCH_INPUT_VALUE(phi1_io),
@@ -129,29 +130,27 @@ module top (
       .D_OUT_0          (porta_o)
   );
 
-  // TODO: this should probably go in the mcs6530.sv file
-  // ALSO need to figure out if there's any muxing based on
-  // address lines etc.
-  //logic [7:0] portb_Int;
-  //assign portb_Int = portb_o | {irq_n, cs1, cs2, 0, 0, 0, 0, 0};
+reg dontcare;
 
   // Bidirectional io port B. Registered input and output enable.
   SB_IO #(
-      .PIN_TYPE(6'b1110_10)
+      .PIN_TYPE(6'b1110_10),
+      .PULLUP(1'b1)
   ) io_portb[7:0] (
-      .PACKAGE_PIN      ({IRQ_PB7, CS1_PB6, CS2_PB5, PB4, PB3, PB2, PB1, PB0}),
+      .PACKAGE_PIN      ({IRQ_PB7, dontcare, CS2_PB5, PB4, PB3, PB2, PB1, PB0}),
       .LATCH_INPUT_VALUE(phi1_io),
 `ifdef VERILATOR
       .CLOCK_ENABLE     (1'b1),
 `endif
       .INPUT_CLK        (phi2_io),
       .OUTPUT_CLK       (phi2_io),
-      .OUTPUT_ENABLE    (ddrb),
+      .OUTPUT_ENABLE    ({irq_en ? 1'b1: ddrb[7], ddrb[6:0]}),
       .D_IN_0           (portb_i),
-      .D_OUT_0          (portb_o)
+      .D_OUT_0          ({irq_en ? irq: portb_o[7], porb_o[6:0]})
   );
 
-
+reg cs1, irq, irq_en;
+assign cs1 = CS1_PB6;
 
   // Address pin inputs.
   SB_IO #(
@@ -182,7 +181,9 @@ module top (
       .PBI(portb_i),
       .DDRA(ddra),
       .DDRB(ddrb),
-      .timer_irq(irq_n)
+      .CS1(cs1),
+      .IRQ(irq),
+      .IRQ_EN(irq_en)
   );
 
 endmodule

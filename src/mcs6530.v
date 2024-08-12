@@ -1,3 +1,5 @@
+`define MOS6530_003=1
+
 module mcs6530 (
     input            phi2,
     input            rst_n,
@@ -13,19 +15,16 @@ module mcs6530 (
     input      [7:0] PBI,    // port B input
     output reg [7:0] DDRA,   // port A OE (data direction register)
     output reg [7:0] DDRB,   // port B OE (data direction register)
-    output reg timer_irq
+    input CS1,
+    output IRQ,
+    output IRQ_EN
 );
 
-  logic CS1;
-  // FIXME Don't understand what this is supposed to be for yet
-  // Like obviously chip selects, but why are there 2 of them
-  // needs more digging into the datasheet
   /* verilator lint_off UNUSEDSIGNAL */
-  logic CS2;
+  logic CS2; // CS2 is not used on 6530-002 or 6530-003
+             // see here http://retro.hansotten.nl/6502-sbc/6530-6532/6530-replacement-kim-1/
   /* verilator lint_on UNUSEDSIGNAL */
 
-  assign CS1 = PBI[6];
-  assign CS2 = PBI[5];
 
   reg [7:0] rom_do;
   reg [7:0] ram_do;
@@ -35,10 +34,6 @@ module mcs6530 (
   reg ram_oe;
   reg io_oe;
   reg timer_oe;
-  //FIXME
-  // I think this was something to do with different addresses for
-  // the two chips in the KIM-1. Not sure if we need it anymore.
-  //parameter IOT_BASE = 10'h0;
 
   logic ram_enable;
   logic rom_enable;
@@ -46,10 +41,18 @@ module mcs6530 (
   logic io_enable;
 
   always_comb begin
-    rom_enable = rst_n & RS0 & CS1;
-    ram_enable = rst_n & !RS0 & !CS1 & !A[9] & A[7] & A[6];
-    timer_enable = rst_n & !RS0 & !CS1 & A[9] & A[8] & A[7] & A[6] & A[2];
-    io_enable = rst_n & !RS0 & !CS1 & A[9] & A[8] & A[7] & A[6] & !A[2];
+    rom_enable = rst_n & !RS0 & CS1;
+    `ifdef MOS6530_002
+        ram_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & A[6];
+        io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & A[6] & !A[2];
+        timer_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & A[6] & A[2];
+    `endif
+    `ifdef MOS6530_003
+        ram_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & ~A[6];
+        io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & ~A[6] & !A[2];
+        timer_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & ~A[6] & A[2];
+    `endif
+
   end
 
 
@@ -88,7 +91,8 @@ module mcs6530 (
       .DI  (DI),
       .DO  (timer_do),
       .OE  (timer_oe),
-      .irq  (timer_irq)
+      .irq  (IRQ),
+      .irq_en(IRQ_EN)
   );
 
   io io0 (
