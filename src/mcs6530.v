@@ -84,6 +84,7 @@ module mcs6530 (
   );
 
   timer timer0 (
+      .enable (timer_enable),
       .clk  (phi2),
       .rst_n  (rst_n),
       .we_n  (we_n),

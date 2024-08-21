@@ -1,14 +1,15 @@
 module verilator_top (
-    inout A0,
-    inout A1,
-    inout A2,
-    inout A3,
-    inout A4,
-    inout A5,
-    inout A6,
-    inout A7,
-    inout A8,
-    inout A9,
+    /*input A0,
+    input A1,
+    input A2,
+    input A3,
+    input A4,
+    input A5,
+    input A6,
+    input A7,
+    input A8,
+    input A9,*/
+    input [9:0] addr,
 
     input RS0,
 
@@ -45,14 +46,13 @@ module verilator_top (
 
     input [7:0] data_i,
     output reg [7:0] data_o,
-    input [9:0] addr,
     output OE,
-
 
     output reg [7:0] porta_o,
     output reg [7:0] portb_o,
     output reg [7:0] ddra,
     output reg [7:0] ddrb
+
 );
 
   wire we_n;
@@ -63,13 +63,6 @@ module verilator_top (
   reg [7:0] portb_i;
   // verilator lint_on UNDRIVEN
   
-  
-  // addr is a signal used by the simulation so we don't
-  // have to worry about writing the addresses bit by bit
-  // unfortunately this little hack means we have to declare
-  // the address lines as inouts when really they're inputs
-  assign {A9, A8, A7, A6, A5, A4, A3, A2, A1, A0} = addr;
-
   assign we_n = R_W;
 
   assign {DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0} = we_n ? data_o : 8'bzzzzzzzz;
@@ -120,7 +113,7 @@ module verilator_top (
       .phi2(PHI2),
       .rst_n(RES),
       .we_n(we_n),
-      .A({A9, A8, A7, A6, A5, A4, A3, A2, A1, A0}),
+      .A(addr),
       .DI(data_i),
       .DO(data_o),
       .OE(OE),

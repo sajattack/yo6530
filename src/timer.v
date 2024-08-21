@@ -1,4 +1,5 @@
 module timer (
+    input            enable,
     input            clk,
     input            rst_n,
     input            we_n,   // RW Read high/Write low
@@ -26,8 +27,8 @@ module timer (
     end 
 
     else begin
-      if (~we_n) begin  
-        irq_en <= A[2]; // does this go here? why is it here and also below
+      if (~we_n & enable) begin  
+        irq_en <= A[2]; 
         // write timer counter
         // I forget why this is -1, but it probably says in the datasheet
         timer <= DI - 1;
@@ -39,13 +40,12 @@ module timer (
           2'b11:   timer_divider <= 10'd1023;
           default: ;
         endcase
-      end else if (~A[0]) begin
+      end else if (~A[0] & enable) begin
         // read timer counter
         irq_en <= A[2];
         DO <= timer;
         OE <= 1'b1;
       end else begin
-        //DO <= {7'd0, ~irq}; // I think this is backwards or at least inconsistent
         DO <= {irq, 7'd0}; // read irq
         OE <= 1'b0;
       end

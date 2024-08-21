@@ -27,14 +27,14 @@ with dwf.DigitalDiscovery() as device:
     rs0 = io[38-24]
     cs1 = io[35-24]
 
-    rs0.setup(enabled=True, state=True)
+    rs0.setup(enabled=True, state=False)
     rw.setup(enabled=True, state=True)
     cs1.setup(enabled=True, state=True)
 
     time.sleep(0.5)
 
     a0 = io[33-24]
-    a0.setup(enabled=True, state=False)
+    a0.setup(enabled=True, state=True)
 
     time.sleep(0.5)
 
@@ -62,14 +62,14 @@ with dwf.DigitalDiscovery() as device:
     io.read_status()
 
     b = [
-        d7.input_state,
-        d6.input_state,
-        d5.input_state,
-        d4.input_state,
-        d3.input_state,
-        d2.input_state,
-        d1.input_state,
         d0.input_state,
+        d1.input_state,
+        d2.input_state,
+        d3.input_state,
+        d4.input_state,
+        d5.input_state,
+        d6.input_state,
+        d7.input_state,
     ]
 
     print(b)

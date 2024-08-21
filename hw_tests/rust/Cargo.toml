@@ -1,0 +1,7 @@
+[workspace]
+resolver="2"
+
+members = [ 
+    "mos6530_hw_tests",
+    "mos6532_hw_tests"
+]

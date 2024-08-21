@@ -17,6 +17,7 @@ void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
     top->R_W = true;
     top->RS0 = false;
     top->CS1 = true;
+
     top->addr = 0;
 
     for (int i=0; i<2; i++) {
@@ -27,7 +28,6 @@ void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
     }
 
     while (top->addr < 1024) {
-
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
 
@@ -67,22 +67,6 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount++;
     }
 
-
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-
-
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-
     #ifdef MOS6530_002
     top->addr = 960;
     #endif
@@ -103,9 +87,9 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount++;
     }
 
-    top->data_i = 0;
-    top->addr = 0;
     top->R_W = true;
+    top->addr = 0;
+    top->data_i = 0;
 
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
@@ -349,7 +333,7 @@ int main(int argc, char** argv) {
     trace->dump(10*tickcount);
     tickcount++;
 
-    top->addr = 0; 
+    top->addr = 0;
     top->PHI2 = true;
     top->eval();
     trace->dump(10*tickcount);

@@ -2,3 +2,4 @@ build/
 Vverilator_top.vcd
 obj_dir/
 draw/
+**/target/

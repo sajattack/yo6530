@@ -1,0 +1,9 @@
+[build]
+target = "avr-specs/avr-atmega2560.json"
+
+[target.'cfg(target_arch = "avr")']
+rustflags = "-Cpanic=abort"
+runner = "ravedude mega2560 -cb 57600"
+
+[unstable]
+build-std = ["core"]
