@@ -1,12 +1,30 @@
 #![no_std]
 #![no_main]
 
+/// MOS 6530 Chip Tester
+///
+/// Data bus PA0-PA7
+/// Addr bus PF0-PF7 + PK0-1
+/// PHI2 PB6
+/// RW PK2
+/// RS0 PK4
+/// RESET PK5
+/// IRQ PK6
+/// CS1 PK7
+/// IO PORTS TBD
+
+
 use panic_halt as _;
 
-use arduino_hal::pac::{
-    PORTA,
-    PORTK,
-    PORTF,
+use arduino_hal::{
+    prelude::*,
+    pac::{
+        PORTA,
+        PORTB,
+        PORTK,
+        PORTF,
+        TC1, USART0,
+    }, hal::{Usart, Atmega, port::{PE0, PE1}}, port::{Pin, mode::{Input, Output}}, clock::MHz16
 };
 
 static ROM_002: [u8; 1024] = *include_bytes!("../../../../roms/6530-002.bin");
@@ -15,11 +33,49 @@ static ROM_003: [u8; 1024] = *include_bytes!("../../../../roms/6530-003.bin");
 #[arduino_hal::entry]
 fn main() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
+    let pins = arduino_hal::hal::pins!(dp);
+    let mut serial = arduino_hal::hal::usart::Usart0::new(dp.USART0, pins.pe0.into(), pins.pe1.into_output(), arduino_hal::usart::Baudrate::<arduino_hal::hal::clock::MHz16>::new(115200));
+    let dp = unsafe { arduino_hal::Peripherals::steal() };
+    let mut timer = dp.TC1;
     let mut porta = dp.PORTA;
+    let mut portb = dp.PORTB;
     let mut portf = dp.PORTF;
     let mut portk = dp.PORTK;
-    test_rom_002(&mut porta, &mut portf, &mut portk);
+    start_1mhz_clock_out(&mut portb,  &mut timer);
+    toggle_reset(&mut portk);
+    test_rom_003(&mut porta, &mut portf, &mut portk, &mut serial);
     loop {}
+}
+
+fn start_1mhz_clock_out(
+    portb: &mut PORTB,
+    timer: &mut TC1,
+)
+{
+    portb.ddrb.modify(|_, w| w.pb6().set_bit());
+    
+    timer.tccr1a.write(|w| {
+        w.com1b().match_set();
+        w.wgm1().bits(15)
+    });
+    timer.tccr1b.write(|w| {
+        w.cs1().direct();
+        w.wgm1().bits(15)
+    });
+
+    timer.ocr1a.write(|w| w.bits(15));
+    timer.ocr1b.write(|w| w.bits(7));
+}
+
+fn toggle_reset( 
+    portk: &mut PORTK,
+) {
+    portk.ddrk.modify(|_, w| w.pk5().set_bit());
+    portk.portk.modify(|_, w| w.pk5().set_bit());
+    arduino_hal::delay_us(1);
+    portk.portk.modify(|_, w| w.pk5().clear_bit());
+    arduino_hal::delay_us(1);
+    portk.portk.modify(|_, w| w.pk5().set_bit());
 }
 
 fn test_rom_002(
@@ -36,10 +92,30 @@ fn test_rom_003(
     porta: &mut PORTA,
     portf: &mut PORTF,
     portk: &mut PORTK,
+    serial: &mut Usart<USART0, Pin<Input, PE0>, Pin<Output, PE1>, MHz16>
 ) {
-   for addr in 0..1023 {
-       assert_eq!(bus_read(porta, portf, portk, addr), ROM_003[addr as usize])
-   }
+    
+    portk.ddrk.modify(|_, w| {
+        w.pk4().set_bit(); // RS0
+        w.pk7().set_bit()  // CS1
+    });
+
+    portk.portk.modify(|_, w| {
+        w.pk4().clear_bit(); // RS0
+        w.pk7().set_bit()  // CS1
+    });
+
+
+    for addr in 0..1023 {
+        let byte_read = bus_read(porta, portf, portk, addr);
+        let byte_expected = ROM_003[addr as usize];
+
+        if byte_read != byte_expected {
+            ufmt::uwriteln!(serial, "ROM read mismatch. Expected 0x{:02X} Got 0x{:02X}", byte_expected, byte_read).unwrap();
+        }
+    }
+    ufmt::uwriteln!(serial, "Finished rom test.").unwrap();
+
 }
 
 fn write_data(porta: &mut PORTA, data: u8) {
@@ -69,7 +145,7 @@ fn read_data(porta: &mut PORTA) -> u8 {
         w.pa6().clear_bit();
         w.pa7().clear_bit()
     });
-    porta.porta.read().bits()
+    porta.pina.read().bits()
 }
 
 
@@ -86,7 +162,7 @@ fn write_addr(portf: &mut PORTF, portk: &mut PORTK, addr: u16) {
         w.pf7().set_bit()
     });
 
-    portk.ddrk.write(|w| {
+    portk.ddrk.modify(|_, w| {
         w.pk0().set_bit();
         w.pk1().set_bit()
     });
@@ -98,8 +174,8 @@ fn write_addr(portf: &mut PORTF, portk: &mut PORTK, addr: u16) {
     });
 
     portk.portk.modify(|_, w| {
-        w.pk0().bit(addr & 0b0100000000 >> 8 == 1);
-        w.pk1().bit(addr & 0b1000000000 >> 9 == 1)
+        w.pk0().bit(addr & 0b0100000000 >> 8 > 0);
+        w.pk1().bit(addr & 0b1000000000 >> 9 > 0)
     });
 }
 
