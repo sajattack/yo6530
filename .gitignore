@@ -3,3 +3,4 @@ Vverilator_top.vcd
 obj_dir/
 draw/
 **/target/
+**/chip_tester-backups/*
