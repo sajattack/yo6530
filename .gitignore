@@ -4,3 +4,4 @@ obj_dir/
 draw/
 **/target/
 **/chip_tester-backups/*
+*.lck

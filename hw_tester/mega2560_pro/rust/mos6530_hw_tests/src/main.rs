@@ -4,14 +4,14 @@
 /// MOS 6530 Chip Tester
 ///
 /// Data bus PA0-PA7
-/// Addr bus PF0-PF7 + PK0-1
+/// Addr bus PF0-PF7 + PG0-1
 /// PHI2 PB6
-/// RW PK2
-/// RS0 PK4
-/// RESET PK5
-/// IRQ PK6
-/// CS1 PK7
-/// IO PORTS TBD
+/// RW PH1
+/// RS0 PB7
+/// RESET PB4
+/// IRQ PD0
+/// CS1 PH0
+/// IO PORTS PC0-5 PK0-7
 
 
 use panic_halt as _;
@@ -23,12 +23,15 @@ use arduino_hal::{
         PORTB,
         PORTK,
         PORTF,
+        PORTH,
+        PORTG,
+        PORTD,
         TC1, USART0,
     }, hal::{Usart, Atmega, port::{PE0, PE1}}, port::{Pin, mode::{Input, Output}}, clock::MHz16
 };
 
-static ROM_002: [u8; 1024] = *include_bytes!("../../../../roms/6530-002.bin");
-static ROM_003: [u8; 1024] = *include_bytes!("../../../../roms/6530-003.bin");
+static ROM_002: [u8; 1024] = *include_bytes!("../../../../../roms/6530-002.bin");
+static ROM_003: [u8; 1024] = *include_bytes!("../../../../../roms/6530-003.bin");
 
 #[arduino_hal::entry]
 fn main() -> ! {
@@ -39,11 +42,14 @@ fn main() -> ! {
     let mut timer = dp.TC1;
     let mut porta = dp.PORTA;
     let mut portb = dp.PORTB;
-    let mut portf = dp.PORTF;
     let mut portk = dp.PORTK;
+    let mut portf = dp.PORTF;
+    let mut porth = dp.PORTH;
+    let mut portg = dp.PORTG;
+    let mut portd = dp.PORTD;
     start_1mhz_clock_out(&mut portb,  &mut timer);
-    toggle_reset(&mut portk);
-    test_rom_003(&mut porta, &mut portf, &mut portk, &mut serial);
+    toggle_reset(&mut portb);
+    test_rom_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
     loop {}
 }
 
@@ -68,46 +74,79 @@ fn start_1mhz_clock_out(
 }
 
 fn toggle_reset( 
-    portk: &mut PORTK,
+    portb: &mut PORTB,
 ) {
-    portk.ddrk.modify(|_, w| w.pk5().set_bit());
-    portk.portk.modify(|_, w| w.pk5().set_bit());
+    portb.ddrb.modify(|_, w| w.pb4().set_bit());
+    portb.portb.modify(|_, w| w.pb4().set_bit());
     arduino_hal::delay_us(1);
-    portk.portk.modify(|_, w| w.pk5().clear_bit());
+    portb.portb.modify(|_, w| w.pb4().clear_bit());
     arduino_hal::delay_us(1);
-    portk.portk.modify(|_, w| w.pk5().set_bit());
+    portb.portb.modify(|_, w| w.pb4().set_bit());
 }
 
 fn test_rom_002(
     porta: &mut PORTA,
+    portb: &mut PORTB,
     portf: &mut PORTF,
-    portk: &mut PORTK,
+    portg: &mut PORTG,
+    porth: &mut PORTH,
+    serial: &mut Usart<USART0, Pin<Input, PE0>, Pin<Output, PE1>, MHz16>
 ) {
+
+    portb.ddrb.modify(|_, w| {
+        w.pb7().set_bit() // RS0
+    });
+    porth.ddrh.modify(|_, w| {
+        w.ph0().set_bit() // CS1
+    });
+
+    portb.portb.modify(|_, w| {
+        w.pb7().clear_bit() // RS0
+    });
+    porth.porth.modify(|_, w| {
+        w.ph0().set_bit()  // CS1
+    });
+
+
+
    for addr in 0..1023 {
-       assert_eq!(bus_read(porta, portf, portk, addr), ROM_002[addr as usize])
-   }
+        let byte_read = bus_read(porta, portf, portg, porth, addr);
+        let byte_expected = ROM_002[addr as usize];
+
+        if byte_read != byte_expected {
+            ufmt::uwriteln!(serial, "ROM read mismatch. Expected 0x{:02X} Got 0x{:02X}", byte_expected, byte_read).unwrap();
+        }
+    }
+    ufmt::uwriteln!(serial, "Finished rom test.").unwrap();
+
 }
 
 fn test_rom_003(
     porta: &mut PORTA,
+    portb: &mut PORTB,
     portf: &mut PORTF,
-    portk: &mut PORTK,
+    portg: &mut PORTG,
+    porth: &mut PORTH,
     serial: &mut Usart<USART0, Pin<Input, PE0>, Pin<Output, PE1>, MHz16>
 ) {
     
-    portk.ddrk.modify(|_, w| {
-        w.pk4().set_bit(); // RS0
-        w.pk7().set_bit()  // CS1
+    portb.ddrb.modify(|_, w| {
+        w.pb7().set_bit() // RS0
+    });
+    porth.ddrh.modify(|_, w| {
+        w.ph0().set_bit() // CS1
     });
 
-    portk.portk.modify(|_, w| {
-        w.pk4().clear_bit(); // RS0
-        w.pk7().set_bit()  // CS1
+    portb.portb.modify(|_, w| {
+        w.pb7().clear_bit() // RS0
+    });
+    porth.porth.modify(|_, w| {
+        w.ph0().set_bit()  // CS1
     });
 
 
     for addr in 0..1023 {
-        let byte_read = bus_read(porta, portf, portk, addr);
+        let byte_read = bus_read(porta, portf, portg, porth, addr);
         let byte_expected = ROM_003[addr as usize];
 
         if byte_read != byte_expected {
@@ -148,9 +187,7 @@ fn read_data(porta: &mut PORTA) -> u8 {
     porta.pina.read().bits()
 }
 
-
-
-fn write_addr(portf: &mut PORTF, portk: &mut PORTK, addr: u16) {
+fn write_addr(portf: &mut PORTF, portg: &mut PORTG, addr: u16) {
     portf.ddrf.write(|w| {
         w.pf0().set_bit();
         w.pf1().set_bit();
@@ -162,9 +199,9 @@ fn write_addr(portf: &mut PORTF, portk: &mut PORTK, addr: u16) {
         w.pf7().set_bit()
     });
 
-    portk.ddrk.modify(|_, w| {
-        w.pk0().set_bit();
-        w.pk1().set_bit()
+    portg.ddrg.modify(|_, w| {
+        w.pg0().set_bit();
+        w.pg1().set_bit()
     });
 
     portf.portf.write(|w| {
@@ -173,49 +210,51 @@ fn write_addr(portf: &mut PORTF, portk: &mut PORTK, addr: u16) {
         }
     });
 
-    portk.portk.modify(|_, w| {
-        w.pk0().bit(addr & 0b0100000000 >> 8 > 0);
-        w.pk1().bit(addr & 0b1000000000 >> 9 > 0)
+    portg.portg.modify(|_, w| {
+        w.pg0().bit(addr & 0b0100000000 >> 8 > 0);
+        w.pg1().bit(addr & 0b1000000000 >> 9 > 0)
     });
 }
 
 fn bus_write(
     porta: &mut PORTA,
     portf: &mut PORTF,
-    portk: &mut PORTK,
+    portg: &mut PORTG,
+    porth: &mut PORTH,
     addr: u16,
     data: u8
 ) {
-    // rw is pk2
-    portk.portk.modify(|_, w| {
-        w.pk2().clear_bit()
+    // rw is ph1
+    porth.porth.modify(|_, w| {
+        w.ph1().clear_bit()
     });
 
 
-    write_addr(portf, portk, addr);
+    write_addr(portf, portg, addr);
     write_data(porta, data);
     
     arduino_hal::delay_us(1);
 
-    // rw is pk2
-    portk.portk.modify(|_, w| {
-        w.pk2().set_bit()
+    // rw is ph1
+    porth.porth.modify(|_, w| {
+        w.ph1().set_bit()
     });
 }
 
 fn bus_read(
     porta: &mut PORTA,
     portf: &mut PORTF,
-    portk: &mut PORTK,
+    portg: &mut PORTG,
+    porth: &mut PORTH,
     addr: u16,
 ) -> u8 {
 
-    // rw is pk2
-    portk.portk.modify(|_, w| {
-        w.pk2().set_bit()
+    // rw is ph1
+    porth.porth.modify(|_, w| {
+        w.ph1().set_bit()
     });
 
-    write_addr(portf, portk, addr);
+    write_addr(portf, portg, addr);
 
     arduino_hal::delay_us(1);
     read_data(porta)
