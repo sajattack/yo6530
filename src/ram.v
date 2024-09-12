@@ -10,7 +10,10 @@ module ram (
   reg [7:0] RAM64[64];
 
   always @(posedge clk) begin
-    if (~we_n) RAM64[A[5:0]] <= DI;
+    if (~we_n) begin
+        RAM64[A[5:0]] <= DI;
+        OE <= 1'b0;
+    end
     else {OE, DO[7:0]} <= {1'b1, RAM64[A[5:0]]};
   end
 

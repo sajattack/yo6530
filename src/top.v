@@ -48,7 +48,12 @@ module top (
   wire rst_n;
   wire irq_n;
   wire phi2_io;
-  wire phi1_io = ~phi2_io;
+  logic phi1_io;
+
+  always_comb begin
+      phi1_io = ~phi2_io;
+  end
+
   wire OE;
 
   wire [7:0] data_i;

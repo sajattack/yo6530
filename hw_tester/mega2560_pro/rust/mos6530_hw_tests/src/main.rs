@@ -47,9 +47,15 @@ fn main() -> ! {
     let mut porth = dp.PORTH;
     let mut portg = dp.PORTG;
     let mut portd = dp.PORTD;
+
+    // disable pull-ups
+    let mut mcucr = &dp.CPU.mcucr;
+    mcucr.modify(|_, w| { w.pud().set_bit()});
+
     start_1mhz_clock_out(&mut portb,  &mut timer);
     toggle_reset(&mut portb);
     test_rom_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
+    test_ram(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
     loop {}
 }
 
@@ -109,15 +115,20 @@ fn test_rom_002(
 
 
 
-   for addr in 0..1023 {
+    let mut error_count = 0;
+    ufmt::uwriteln!(serial, "ROM 002 test start\r");
+
+    for addr in 0..1023 {
         let byte_read = bus_read(porta, portf, portg, porth, addr);
         let byte_expected = ROM_002[addr as usize];
 
         if byte_read != byte_expected {
-            ufmt::uwriteln!(serial, "ROM read mismatch. Expected 0x{:02X} Got 0x{:02X}", byte_expected, byte_read).unwrap();
+            ufmt::uwriteln!(serial, "ROM read mismatch. Expected 0x{:02X} Got 0x{:02X}\r", byte_expected, byte_read).unwrap();
+            error_count += 1;
         }
     }
-    ufmt::uwriteln!(serial, "Finished rom test.").unwrap();
+    ufmt::uwriteln!(serial, "Error count: {}\r", error_count).unwrap();
+    ufmt::uwriteln!(serial, "Finished rom test.\r").unwrap();
 
 }
 
@@ -144,16 +155,72 @@ fn test_rom_003(
         w.ph0().set_bit()  // CS1
     });
 
+    let mut error_count = 0;
+
+    ufmt::uwriteln!(serial, "ROM 003 test start\r");
 
     for addr in 0..1023 {
         let byte_read = bus_read(porta, portf, portg, porth, addr);
         let byte_expected = ROM_003[addr as usize];
 
         if byte_read != byte_expected {
-            ufmt::uwriteln!(serial, "ROM read mismatch. Expected 0x{:02X} Got 0x{:02X}", byte_expected, byte_read).unwrap();
+            ufmt::uwriteln!(serial, "ROM read mismatch. Expected 0x{:02X} Got 0x{:02X}\r", byte_expected, byte_read).unwrap();
+            error_count += 1;
         }
     }
-    ufmt::uwriteln!(serial, "Finished rom test.").unwrap();
+    ufmt::uwriteln!(serial, "Error count: {}\r", error_count).unwrap();
+    ufmt::uwriteln!(serial, "Finished rom test.\r").unwrap();
+
+}
+
+fn test_ram(
+    porta: &mut PORTA,
+    portb: &mut PORTB,
+    portf: &mut PORTF,
+    portg: &mut PORTG,
+    porth: &mut PORTH,
+    serial: &mut Usart<USART0, Pin<Input, PE0>, Pin<Output, PE1>, MHz16>
+) {
+    
+    portb.ddrb.modify(|_, w| {
+        w.pb7().set_bit() // RS0
+    });
+    porth.ddrh.modify(|_, w| {
+        w.ph0().set_bit() // CS1
+    });
+
+    portb.portb.modify(|_, w| {
+        w.pb7().set_bit() // RS0
+    });
+    porth.porth.modify(|_, w| {
+        w.ph0().clear_bit()  // CS1
+    });
+
+    //let start_addr = 0b11100000000;
+    let start_addr = 0x380;
+
+    let bytes = [0xAA, 0x55, 0xAA, 0x55, b'H', b'E', b'L', b'L', b'O', b'W', b'O', b'R', b'L', b'D', b'!'];
+
+    ufmt::uwriteln!(serial, "RAM write start\r").unwrap();
+
+    for addr in start_addr..start_addr + bytes.len() {
+        bus_write(porta, portf, portg, porth, addr as u16, bytes[addr-start_addr]);
+    }
+
+    ufmt::uwriteln!(serial, "RAM read start\r").unwrap();
+
+    let mut error_count = 0;
+    for addr in start_addr..start_addr + bytes.len() {
+        let byte_read = bus_read(porta, portf, portg, porth, addr as u16);
+        let byte_expected = bytes[addr-start_addr];
+
+        if byte_read != byte_expected {
+            ufmt::uwriteln!(serial, "RAM read mismatch. Expected 0x{:02X} Got 0x{:02X}\r", byte_expected, byte_read).unwrap();
+            error_count += 1;
+        }
+    }
+    ufmt::uwriteln!(serial, "Error count: {}\r", error_count).unwrap();
+    ufmt::uwriteln!(serial, "Finished ram test.\r").unwrap();
 
 }
 
@@ -211,8 +278,8 @@ fn write_addr(portf: &mut PORTF, portg: &mut PORTG, addr: u16) {
     });
 
     portg.portg.modify(|_, w| {
-        w.pg0().bit(addr & 0b0100000000 >> 8 > 0);
-        w.pg1().bit(addr & 0b1000000000 >> 9 > 0)
+        w.pg0().bit(addr & 0b0100000000 > 0);
+        w.pg1().bit(addr & 0b1000000000 > 0)
     });
 }
 
@@ -224,13 +291,18 @@ fn bus_write(
     addr: u16,
     data: u8
 ) {
+
     // rw is ph1
     porth.porth.modify(|_, w| {
         w.ph1().clear_bit()
     });
 
+    arduino_hal::delay_us(1);
 
     write_addr(portf, portg, addr);
+
+    arduino_hal::delay_us(1);
+
     write_data(porta, data);
     
     arduino_hal::delay_us(1);
@@ -239,6 +311,8 @@ fn bus_write(
     porth.porth.modify(|_, w| {
         w.ph1().set_bit()
     });
+
+    arduino_hal::delay_us(1);
 }
 
 fn bus_read(
@@ -253,10 +327,12 @@ fn bus_read(
     porth.porth.modify(|_, w| {
         w.ph1().set_bit()
     });
+    arduino_hal::delay_us(1);
 
     write_addr(portf, portg, addr);
 
     arduino_hal::delay_us(1);
+
     read_data(porta)
 }
 
