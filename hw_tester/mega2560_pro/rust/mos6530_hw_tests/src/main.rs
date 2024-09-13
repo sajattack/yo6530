@@ -367,9 +367,13 @@ fn bus_write(
 
 
     // rw is ph1
+    porth.ddrh.modify(|_, w| {
+        w.ph1().set_bit()
+    });
     porth.porth.modify(|_, w| {
         w.ph1().clear_bit()
     });
+
     arduino_hal::delay_us(1);
 
     write_addr(portf, portg, addr);
@@ -418,6 +422,9 @@ fn bus_read(
 ) -> u8 {
 
     // rw is ph1
+    porth.ddrh.modify(|_, w| {
+        w.ph1().set_bit()
+    });
     porth.porth.modify(|_, w| {
         w.ph1().set_bit()
     });
