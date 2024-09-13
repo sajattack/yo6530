@@ -284,11 +284,11 @@ fn test_timer_003(
     unsafe { avr_device::interrupt::enable() }; 
 
     ufmt::uwriteln!(serial, "Timer write start\r").unwrap();
-    let addr = 0x300 + 0b111;
-    bus_write(porta, portf, portg, porth, addr, 0x7f);
+    let addr = 0x30f;
+    bus_write(porta, portf, portg, porth, addr, 0);
 
     ufmt::uwriteln!(serial, "Timer read start\r").unwrap();
-    let addr = 0x300;
+    let addr = 0x30e;
 
     let timer_val = bus_read(porta, portf, portg, porth, addr);
     ufmt::uwriteln!(serial, "Timer value: {}\r", timer_val).unwrap();
