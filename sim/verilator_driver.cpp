@@ -298,13 +298,13 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
 
     top->R_W = true;
 
-    for (int i=0; i<2048*122-42; i++) { // time it takes for timer_count to be 0
+    for (int i=0; i<2048*122-38; i++) { // time it takes for timer_count to be 0
         top->PHI2 = !(top->PHI2);
         top->eval();
         trace->dump(10*tickcount);
         tickcount++;
     }
-    //assert(top->IRQ_PB7==0);
+    assert(top->IRQ_PB7==0);
 }
 
 int main(int argc, char** argv) {

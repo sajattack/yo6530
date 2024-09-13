@@ -46,7 +46,6 @@ module top (
 
   wire we_n;
   wire rst_n;
-  wire irq_n;
   wire phi2_io;
   logic phi1_io;
 
@@ -73,6 +72,7 @@ module top (
   SB_IO #(
       .PIN_TYPE(6'b0000_01),
       .PULLUP  (1'b1)
+
   ) io_phi2 (
       .PACKAGE_PIN(PHI2),
       .D_IN_0     (phi2_io)
@@ -136,6 +136,8 @@ module top (
   );
 
 reg dontcare;
+reg cs1, irq, irq_en;
+assign cs1 = CS1_PB6;
 
   // Bidirectional io port B. Registered input and output enable.
   SB_IO #(
@@ -154,8 +156,6 @@ reg dontcare;
       .D_OUT_0          ({irq_en ? irq: portb_o[7], porb_o[6:0]})
   );
 
-reg cs1, irq, irq_en;
-assign cs1 = CS1_PB6;
 
   // Address pin inputs.
   SB_IO #(

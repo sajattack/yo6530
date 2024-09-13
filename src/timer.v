@@ -34,7 +34,7 @@ module timer (
         timer <= DI - 1;
         // write divider based on address lines
         case (A[1:0])
-          2'b00:   timer_divider <= 10'd1;
+          2'b00:   timer_divider <= 10'd0;
           2'b01:   timer_divider <= 10'd7;
           2'b10:   timer_divider <= 10'd63;
           2'b11:   timer_divider <= 10'd1023;

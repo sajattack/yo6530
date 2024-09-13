@@ -18,10 +18,10 @@
 use panic_halt as _;
 
 use arduino_hal::{
-    prelude::*,
     pac::{
         PORTA,
         PORTB,
+        PORTC,
         PORTK,
         PORTF,
         PORTH,
@@ -39,7 +39,7 @@ fn INT0() {
     let dp = unsafe { arduino_hal::Peripherals::steal() };
     let pins = arduino_hal::hal::pins!(dp);
     let mut serial = arduino_hal::hal::usart::Usart0::new(dp.USART0, pins.pe0.into(), pins.pe1.into_output(), arduino_hal::usart::Baudrate::<arduino_hal::hal::clock::MHz16>::new(115200));
-    ufmt::uwriteln!(&mut serial, "INTERRUPT FIRED\r");
+    ufmt::uwriteln!(&mut serial, "INTERRUPT FIRED\r").unwrap();
 }
 
 #[arduino_hal::entry]
@@ -59,6 +59,10 @@ fn main() -> ! {
 
     // disable pull-ups
     dp.CPU.mcucr.modify(|_, w| { w.pud().set_bit()});
+
+    // enable INT0 falling edge interrupt
+    dp.EXINT.eicra.modify(|_, w| { w.isc0().val_0x02()});
+    dp.EXINT.eimsk.modify(|_, w| { w.int().bits(1)});
 
     start_1mhz_clock_out(&mut portb,  &mut timer);
     //start_125KHz_clock_out(&mut portb,  &mut timer);
@@ -147,7 +151,7 @@ fn test_rom_002(
 
 
     let mut error_count = 0;
-    ufmt::uwriteln!(serial, "ROM 002 test start\r");
+    ufmt::uwriteln!(serial, "ROM 002 test start\r").unwrap();
 
     for addr in 0..1023 {
         let byte_read = bus_read(porta, portf, portg, porth, addr);
@@ -188,7 +192,7 @@ fn test_rom_003(
 
     let mut error_count = 0;
 
-    ufmt::uwriteln!(serial, "ROM 003 test start\r");
+    ufmt::uwriteln!(serial, "ROM 003 test start\r").unwrap();
 
     for addr in 0..1023 {
         let byte_read = bus_read(porta, portf, portg, porth, addr);
@@ -277,9 +281,11 @@ fn test_timer_003(
         w.ph0().clear_bit()  // CS1
     });
 
+    unsafe { avr_device::interrupt::enable() }; 
+
     ufmt::uwriteln!(serial, "Timer write start\r").unwrap();
-    let addr = 0x307;
-    bus_write(porta, portf, portg, porth, addr, 0);
+    let addr = 0x300 + 0b111;
+    bus_write(porta, portf, portg, porth, addr, 0x7f);
 
     ufmt::uwriteln!(serial, "Timer read start\r").unwrap();
     let addr = 0x300;
@@ -367,6 +373,9 @@ fn bus_write(
     arduino_hal::delay_us(1);
 
     write_addr(portf, portg, addr);
+
+    arduino_hal::delay_us(1);
+
     write_data(porta, data);
 
     arduino_hal::delay_us(1);
