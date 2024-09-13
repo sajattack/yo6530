@@ -56,7 +56,7 @@ module top (
 
   wire OE;
 
-  wire [7:0] data_i;
+  reg [7:0] data_i;
   wire [7:0] data_o;
 
   wire [7:0] porta_i;

@@ -4,8 +4,8 @@ module timer (
     input            rst_n,
     input            we_n,   // RW Read high/Write low
     input      [2:0] A,      // Address
-    input      [7:0] DI,     // Data from processor
-    output reg [7:0] DO,     // Data to processor
+    input      [7:0] DI,     // Data to processor
+    output reg [7:0] DO,     // Data from processor
     output           OE,     // Indicates data driven on DO
     output reg       irq,
     output reg irq_en
@@ -20,7 +20,7 @@ module timer (
     // reset logic
     if (~rst_n) begin
       timer <= 8'd0;
-      timer_divider <= 10'd0;
+      timer_divider <= 10'd1;
       timer_count <= 10'd0;
       irq <= 1'd1; // high means not interrupt
       irq_en <= 1'd0; // low means interrupt disabled
@@ -34,7 +34,7 @@ module timer (
         timer <= DI - 1;
         // write divider based on address lines
         case (A[1:0])
-          2'b00:   timer_divider <= 10'd0;
+          2'b00:   timer_divider <= 10'd1;
           2'b01:   timer_divider <= 10'd7;
           2'b10:   timer_divider <= 10'd63;
           2'b11:   timer_divider <= 10'd1023;

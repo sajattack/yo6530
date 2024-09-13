@@ -5,8 +5,8 @@ module mcs6530 (
     input            rst_n,
     input            we_n,   // RW Read high/Write low
     input      [9:0] A,      // Address
-    input      [7:0] DI,     // Data from processor
-    output reg [7:0] DO,     // Data to processor
+    input reg  [7:0] DI,     // Data to processor
+    output reg [7:0] DO,     // Data from processor
     output           OE,     // Indicates data driven on DO
     input            RS0,    // ROM select, might need to be inverted?
     output reg [7:0] PAO,    // port A output

@@ -11,10 +11,9 @@ module ram (
 
   always @(posedge clk) begin
     if (~we_n) begin
-        RAM64[A[5:0]] <= DI;
-        OE <= 1'b0;
+        {OE, RAM64[A]} <= {1'b0, DI};
     end
-    else {OE, DO[7:0]} <= {1'b1, RAM64[A[5:0]]};
+    else {OE, DO[7:0]} <= {1'b1, RAM64[A]};
   end
 
 endmodule

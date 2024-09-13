@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 
+#![feature(abi_avr_interrupt)]
 /// MOS 6530 Chip Tester
 ///
 /// Data bus PA0-PA7
@@ -33,6 +34,14 @@ use arduino_hal::{
 static ROM_002: [u8; 1024] = *include_bytes!("../../../../../roms/6530-002.bin");
 static ROM_003: [u8; 1024] = *include_bytes!("../../../../../roms/6530-003.bin");
 
+#[avr_device::interrupt(atmega2560)]
+fn INT0() {
+    let dp = unsafe { arduino_hal::Peripherals::steal() };
+    let pins = arduino_hal::hal::pins!(dp);
+    let mut serial = arduino_hal::hal::usart::Usart0::new(dp.USART0, pins.pe0.into(), pins.pe1.into_output(), arduino_hal::usart::Baudrate::<arduino_hal::hal::clock::MHz16>::new(115200));
+    ufmt::uwriteln!(&mut serial, "INTERRUPT FIRED\r");
+}
+
 #[arduino_hal::entry]
 fn main() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
@@ -49,13 +58,14 @@ fn main() -> ! {
     let mut portd = dp.PORTD;
 
     // disable pull-ups
-    let mut mcucr = &dp.CPU.mcucr;
-    mcucr.modify(|_, w| { w.pud().set_bit()});
+    dp.CPU.mcucr.modify(|_, w| { w.pud().set_bit()});
 
     start_1mhz_clock_out(&mut portb,  &mut timer);
+    //start_125KHz_clock_out(&mut portb,  &mut timer);
     toggle_reset(&mut portb);
     test_rom_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
-    test_ram(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
+    test_ram_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
+    test_timer_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
     loop {}
 }
 
@@ -72,6 +82,27 @@ fn start_1mhz_clock_out(
     });
     timer.tccr1b.write(|w| {
         w.cs1().direct();
+        w.wgm1().bits(15)
+    });
+
+    timer.ocr1a.write(|w| w.bits(15));
+    timer.ocr1b.write(|w| w.bits(7));
+}
+
+fn start_125KHz_clock_out(
+    portb: &mut PORTB,
+    timer: &mut TC1,
+)
+{
+    portb.ddrb.modify(|_, w| w.pb6().set_bit());
+    
+    timer.tccr1a.write(|w| {
+        w.com1b().match_set();
+        w.wgm1().bits(15)
+    });
+    timer.tccr1b.write(|w| {
+        w.cs1().direct();
+        w.cs1().prescale_8();
         w.wgm1().bits(15)
     });
 
@@ -173,7 +204,7 @@ fn test_rom_003(
 
 }
 
-fn test_ram(
+fn test_ram_003(
     porta: &mut PORTA,
     portb: &mut PORTB,
     portf: &mut PORTF,
@@ -196,7 +227,6 @@ fn test_ram(
         w.ph0().clear_bit()  // CS1
     });
 
-    //let start_addr = 0b11100000000;
     let start_addr = 0x380;
 
     let bytes = [0xAA, 0x55, 0xAA, 0x55, b'H', b'E', b'L', b'L', b'O', b'W', b'O', b'R', b'L', b'D', b'!'];
@@ -223,6 +253,43 @@ fn test_ram(
     ufmt::uwriteln!(serial, "Finished ram test.\r").unwrap();
 
 }
+
+fn test_timer_003(
+    porta: &mut PORTA,
+    portb: &mut PORTB,
+    portf: &mut PORTF,
+    portg: &mut PORTG,
+    porth: &mut PORTH,
+    serial: &mut Usart<USART0, Pin<Input, PE0>, Pin<Output, PE1>, MHz16>
+) {
+
+    portb.ddrb.modify(|_, w| {
+        w.pb7().set_bit() // RS0
+    });
+    porth.ddrh.modify(|_, w| {
+        w.ph0().set_bit() // CS1
+    });
+
+    portb.portb.modify(|_, w| {
+        w.pb7().set_bit() // RS0
+    });
+    porth.porth.modify(|_, w| {
+        w.ph0().clear_bit()  // CS1
+    });
+
+    ufmt::uwriteln!(serial, "Timer write start\r").unwrap();
+    let addr = 0x307;
+    bus_write(porta, portf, portg, porth, addr, 0);
+
+    ufmt::uwriteln!(serial, "Timer read start\r").unwrap();
+    let addr = 0x300;
+
+    let timer_val = bus_read(porta, portf, portg, porth, addr);
+    ufmt::uwriteln!(serial, "Timer value: {}\r", timer_val).unwrap();
+
+    ufmt::uwriteln!(serial, "Timer read end\r").unwrap();
+}
+ 
 
 fn write_data(porta: &mut PORTA, data: u8) {
     porta.ddra.write(|w| {
@@ -292,27 +359,45 @@ fn bus_write(
     data: u8
 ) {
 
+
     // rw is ph1
     porth.porth.modify(|_, w| {
         w.ph1().clear_bit()
     });
-
     arduino_hal::delay_us(1);
 
     write_addr(portf, portg, addr);
-
-    arduino_hal::delay_us(1);
-
     write_data(porta, data);
-    
+
     arduino_hal::delay_us(1);
 
     // rw is ph1
+    // deassert
     porth.porth.modify(|_, w| {
         w.ph1().set_bit()
     });
 
-    arduino_hal::delay_us(1);
+    // deassert data bus
+    porta.ddra.write(|w| {
+        w.pa0().clear_bit();
+        w.pa1().clear_bit();
+        w.pa2().clear_bit();
+        w.pa3().clear_bit();
+        w.pa4().clear_bit();
+        w.pa5().clear_bit();
+        w.pa6().clear_bit();
+        w.pa7().clear_bit()
+    });
+    porta.porta.write(|w| {
+        w.pa0().clear_bit();
+        w.pa1().clear_bit();
+        w.pa2().clear_bit();
+        w.pa3().clear_bit();
+        w.pa4().clear_bit();
+        w.pa5().clear_bit();
+        w.pa6().clear_bit();
+        w.pa7().clear_bit()
+    });
 }
 
 fn bus_read(
@@ -327,7 +412,6 @@ fn bus_read(
     porth.porth.modify(|_, w| {
         w.ph1().set_bit()
     });
-    arduino_hal::delay_us(1);
 
     write_addr(portf, portg, addr);
 
