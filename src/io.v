@@ -3,12 +3,12 @@ module io (
     input we_n,
     input [2:0] A,
     output reg [7:0] PAO,    // port A output
-    input      [7:0] PAI,    // port A input
+    input reg [7:0] PAI,    // port A input
     output reg [7:0] PBO,    // port B output
-    input      [7:0] PBI,    // port B input
+    input reg [7:0] PBI,    // port B input
     output reg [7:0] DDRA,   // port A OE (data direction register)
     output reg [7:0] DDRB,   // port B OE (data direction register)
-    input [7:0] DI,
+    input reg [7:0] DI,
     output reg [7:0] DO,
     output reg OE
 );

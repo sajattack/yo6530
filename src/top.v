@@ -1,16 +1,16 @@
 module top (
-    inout A0,
-    inout A1,
-    inout A2,
-    inout A3,
-    inout A4,
-    inout A5,
-    inout A6,
-    inout A7,
-    inout A8,
-    inout A9,
+    input A0,
+    input A1,
+    input A2,
+    input A3,
+    input A4,
+    input A5,
+    input A6,
+    input A7,
+    input A8,
+    input A9,
 
-    inout RS0,
+    input RS0,
 
     inout DB0,
     inout DB1,
@@ -40,8 +40,8 @@ module top (
     inout IRQ_PB7,
     input R_W,
 
-    inout PHI2,
-    inout RES
+    input PHI2,
+    input RES
 );
 
   wire we_n;
@@ -56,18 +56,18 @@ module top (
   wire OE;
 
   reg [7:0] data_i;
-  wire [7:0] data_o;
+  reg [7:0] data_o;
 
-  wire [7:0] porta_i;
-  wire [7:0] porta_o;
+  reg [7:0] porta_i;
+  reg [7:0] porta_o;
 
-  wire [7:0] portb_i;
-  wire [7:0] portb_o;
+  reg [7:0] portb_i;
+  reg [7:0] portb_o;
 
-  wire [7:0] ddra;
-  wire [7:0] ddrb;
+  reg [7:0] ddra;
+  reg [7:0] ddrb;
 
-  wire [9:0] addr;
+  reg [9:0] addr;
 
   SB_IO #(
       .PIN_TYPE(6'b0000_01),
@@ -153,7 +153,7 @@ assign cs1 = CS1_PB6;
       .OUTPUT_CLK       (phi2_io),
       .OUTPUT_ENABLE    ({irq_en ? 1'b1: ddrb[7], ddrb[6:0]}),
       .D_IN_0           (portb_i),
-      .D_OUT_0          ({irq_en ? irq: portb_o[7], porb_o[6:0]})
+      .D_OUT_0          ({irq_en ? irq: portb_o[7], portb_o[6:0]})
   );
 
 

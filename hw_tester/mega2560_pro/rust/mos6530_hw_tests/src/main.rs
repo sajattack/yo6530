@@ -27,7 +27,7 @@ use arduino_hal::{
         PORTH,
         PORTG,
         PORTD,
-        TC1, USART0,
+        TC1, USART0, EXINT,
     }, hal::{Usart, Atmega, port::{PE0, PE1}}, port::{Pin, mode::{Input, Output}}, clock::MHz16
 };
 
@@ -56,20 +56,18 @@ fn main() -> ! {
     let mut porth = dp.PORTH;
     let mut portg = dp.PORTG;
     let mut portd = dp.PORTD;
+    let mut exint = dp.EXINT;
 
     // disable pull-ups
     dp.CPU.mcucr.modify(|_, w| { w.pud().set_bit()});
-
-    // enable INT0 falling edge interrupt
-    dp.EXINT.eicra.modify(|_, w| { w.isc0().val_0x02()});
-    dp.EXINT.eimsk.modify(|_, w| { w.int().bits(1)});
 
     start_1mhz_clock_out(&mut portb,  &mut timer);
     //start_125KHz_clock_out(&mut portb,  &mut timer);
     toggle_reset(&mut portb);
     test_rom_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
     test_ram_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
-    test_timer_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
+    test_io_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut portk, &mut serial);
+    test_timer_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut exint, &mut serial);
     loop {}
 }
 
@@ -147,8 +145,6 @@ fn test_rom_002(
     porth.porth.modify(|_, w| {
         w.ph0().set_bit()  // CS1
     });
-
-
 
     let mut error_count = 0;
     ufmt::uwriteln!(serial, "ROM 002 test start\r").unwrap();
@@ -258,12 +254,68 @@ fn test_ram_003(
 
 }
 
+fn test_io_003(
+    porta: &mut PORTA,
+    portb: &mut PORTB,
+    portf: &mut PORTF,
+    portg: &mut PORTG,
+    porth: &mut PORTH,
+    portk: &mut PORTK,
+    serial: &mut Usart<USART0, Pin<Input, PE0>, Pin<Output, PE1>, MHz16>
+) {
+    portb.ddrb.modify(|_, w| {
+        w.pb7().set_bit() // RS0
+    });
+    porth.ddrh.modify(|_, w| {
+        w.ph0().set_bit() // CS1
+    });
+
+    portb.portb.modify(|_, w| {
+        w.pb7().set_bit() // RS0
+    });
+    porth.porth.modify(|_, w| {
+        w.ph0().clear_bit()  // CS1
+    });
+
+    ufmt::uwriteln!(serial, "Begin IO test\r").unwrap();
+    // write RRIOT DDRA
+    let addr = 0x301;
+    let data = 0xff;
+    bus_write(porta, portf, portg, porth, addr, data);
+
+    // write RRIOT IO
+    let addr = 0x300;
+    let data = 0x55;
+    bus_write(porta, portf, portg, porth, addr, data);
+    
+    // check output on PORTA (PK on the mega2560);
+    portk.ddrk.write(|w| {
+        w.pk0().clear_bit();
+        w.pk1().clear_bit();
+        w.pk2().clear_bit();
+        w.pk3().clear_bit();
+        w.pk4().clear_bit();
+        w.pk5().clear_bit();
+        w.pk6().clear_bit();
+        w.pk7().clear_bit()
+    });
+    let porta_out = portk.pink.read().bits();
+    if porta_out == data {
+        ufmt::uwriteln!(serial, "Successfully output {} on PORTA", data).unwrap();
+    }
+    else {
+        ufmt::uwriteln!(serial, "Output mismatch on PORTA, expected 0x{:02X}, got 0x{:02X}", data, porta_out).unwrap();
+    }
+    ufmt::uwriteln!(serial, "Finished IO test").unwrap(); 
+}
+
 fn test_timer_003(
     porta: &mut PORTA,
     portb: &mut PORTB,
     portf: &mut PORTF,
     portg: &mut PORTG,
     porth: &mut PORTH,
+    exint: &mut EXINT,
     serial: &mut Usart<USART0, Pin<Input, PE0>, Pin<Output, PE1>, MHz16>
 ) {
 
@@ -282,6 +334,10 @@ fn test_timer_003(
     });
 
     unsafe { avr_device::interrupt::enable() }; 
+
+    // enable INT0 falling edge interrupt
+    exint.eicra.modify(|_, w| { w.isc0().val_0x02()});
+    exint.eimsk.modify(|_, w| { w.int().bits(1)});
 
     ufmt::uwriteln!(serial, "Timer write start\r").unwrap();
     let addr = 0x30f;
