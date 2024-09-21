@@ -36,10 +36,10 @@ static ROM_003: [u8; 1024] = *include_bytes!("../../../../../roms/6530-003.bin")
 
 #[avr_device::interrupt(atmega2560)]
 fn INT0() {
-    let dp = unsafe { arduino_hal::Peripherals::steal() };
-    let pins = arduino_hal::hal::pins!(dp);
-    let mut serial = arduino_hal::hal::usart::Usart0::new(dp.USART0, pins.pe0.into(), pins.pe1.into_output(), arduino_hal::usart::Baudrate::<arduino_hal::hal::clock::MHz16>::new(115200));
-    ufmt::uwriteln!(&mut serial, "INTERRUPT FIRED\r").unwrap();
+    //let dp = unsafe { arduino_hal::Peripherals::steal() };
+    //let pins = arduino_hal::hal::pins!(dp);
+    //let mut serial = arduino_hal::hal::usart::Usart0::new(dp.USART0, pins.pe0.into(), pins.pe1.into_output(), arduino_hal::usart::Baudrate::<arduino_hal::hal::clock::MHz16>::new(115200));
+    //ufmt::uwriteln!(&mut serial, "INTERRUPT FIRED\r").unwrap();
 }
 
 #[arduino_hal::entry]

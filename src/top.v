@@ -53,7 +53,7 @@ module top (
       phi1_io = ~phi2_io;
   end
 
-  wire OE;
+  reg OE;
 
   reg [7:0] data_i;
   reg [7:0] data_o;
@@ -135,8 +135,9 @@ module top (
       .D_OUT_0          (porta_o)
   );
 
+wire cs1;
 reg dontcare;
-reg cs1, irq, irq_en;
+reg irq, irq_en;
 assign cs1 = CS1_PB6;
 
   // Bidirectional io port B. Registered input and output enable.

@@ -55,18 +55,6 @@ module mcs6530 (
 
   end
 
-
-  always_ff @(posedge phi2) begin
-    // reset logic
-    if (~rst_n) begin
-      PAO <= 8'd0;
-      DDRA <= 8'd0;
-      PBO <= 8'd0;
-      DDRB <= 8'd0;
-    end
-  end
-
-
   ram ram0 (
       .clk(phi2),
       .we_n(we_n),
@@ -98,7 +86,9 @@ module mcs6530 (
 
   io io0 (
       .clk  (phi2),
+      .rst_n(rst_n),
       .we_n  (we_n),
+      .enable(io_enable),
       .A  (A [2:0] ),
       .DI  (DI),
       .DO  (io_do),
@@ -129,6 +119,16 @@ module mcs6530 (
       {OE, DO} = {1'b0, 8'bxxxxxxxx};
     end
   end
+
+  // This breaks io :(
+  //always @(posedge phi2) begin
+      //if (~rst_n) begin
+          //DDRA <= 8'b00;
+          //DDRB <= 8'b00;
+          //PA0 <=  8'b00;
+          //PAB <= 8'b00;
+     //end
+  //end
 
 endmodule
 

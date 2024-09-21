@@ -6,7 +6,7 @@ module timer (
     input      [2:0] A,      // Address
     input      [7:0] DI,     // Data to processor
     output reg [7:0] DO,     // Data from processor
-    output           OE,     // Indicates data driven on DO
+    output reg       OE,     // Indicates data driven on DO
     output reg       irq,
     output reg irq_en
 );
