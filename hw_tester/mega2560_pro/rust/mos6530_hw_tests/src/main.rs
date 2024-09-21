@@ -301,7 +301,7 @@ fn test_io_003(
     });
     let porta_out = portk.pink.read().bits();
     if porta_out == data {
-        ufmt::uwriteln!(serial, "Successfully output {} on PORTA", data).unwrap();
+        ufmt::uwriteln!(serial, "Successfully output 0x{:02X} on PORTA", data).unwrap();
     }
     else {
         ufmt::uwriteln!(serial, "Output mismatch on PORTA, expected 0x{:02X}, got 0x{:02X}", data, porta_out).unwrap();
