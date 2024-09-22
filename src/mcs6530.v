@@ -44,12 +44,12 @@ module mcs6530 (
     rom_enable = rst_n & !RS0 & CS1;
     `ifdef MOS6530_002
         ram_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & A[6];
-        io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & A[6] & !A[2];
-        timer_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & A[6] & A[2];
+        io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & A[6] & ~A[2];
+        timer_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & A[6] & A[2];
     `endif
     `ifdef MOS6530_003
         ram_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & ~A[6];
-        io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & ~A[6] & !A[2];
+        io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & ~A[6] & ~A[2];
         timer_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & ~A[6] & A[2];
     `endif
 
@@ -119,16 +119,6 @@ module mcs6530 (
       {OE, DO} = {1'b0, 8'bxxxxxxxx};
     end
   end
-
-  // This breaks io :(
-  //always @(posedge phi2) begin
-      //if (~rst_n) begin
-          //DDRA <= 8'b00;
-          //DDRB <= 8'b00;
-          //PA0 <=  8'b00;
-          //PAB <= 8'b00;
-     //end
-  //end
 
 endmodule
 
