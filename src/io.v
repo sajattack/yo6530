@@ -1,6 +1,8 @@
 module io (
     input clk,
+    // verilator lint_off UNUSEDSIGNAL
     input rst_n,
+    // verilator lint_on UNUSEDSIGNAL
     input enable,
     input we_n,
     input [2:0] A,

@@ -68,10 +68,10 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     }
 
     #ifdef MOS6530_002
-    top->addr = 960;
+    top->addr = 0x3c0;
     #endif
     #ifdef MOS6530_003
-    top->addr = 896;
+    top->addr = 0x380;
     #endif
     top->R_W = false; 
     top->PHI2 = !(top->PHI2);
@@ -100,10 +100,10 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     assert(top->data_o != 0x55);
 
     #ifdef MOS6530_002
-    top->addr = 960;
+    top->addr = 0x3c0;
     #endif
     #ifdef MOS6530_003
-    top->addr = 896;
+    top->addr = 0x380;
     #endif
 
     top->PHI2 = !(top->PHI2);
@@ -136,10 +136,10 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     // write ddra
 
     #ifdef MOS6530_002
-    top->addr = 833;
+    top->addr = 0x341;
     #endif
     #ifdef MOS6530_003
-    top->addr = 769;
+    top->addr = 0x301;
     #endif
 
     // all outputs
@@ -156,10 +156,10 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     // write pins off/on
 
     #ifdef MOS6530_002
-    top->addr = 832;
+    top->addr = 0x340;
     #endif
     #ifdef MOS6530_003
-    top->addr = 768;
+    top->addr = 0x300;
     #endif
 
     // magic value
@@ -190,10 +190,10 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
 
     // move back to porta, read
     #ifdef MOS6530_002
-    top->addr = 832;
+    top->addr = 0x340;
     #endif
     #ifdef MOS6530_003
-    top->addr = 768;
+    top->addr = 0x300;
     #endif
 
     top->R_W = true;
@@ -217,10 +217,10 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
 
     // write timer
     #ifdef MOS6530_002
-    top->addr = 836;
+    top->addr = 0x344;
     #endif
     #ifdef MOS6530_003
-    top->addr = 772;
+    top->addr = 0x304;
     #endif
 
     top->R_W = false;
@@ -246,10 +246,10 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
 
     
     #ifdef MOS6530_002
-    top->addr = 836;
+    top->addr = 0x344;
     #endif
     #ifdef MOS6530_003
-    top->addr = 772;
+    top->addr = 0x304;
     #endif
 
 
@@ -273,10 +273,10 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
 
     // test irq
     #ifdef MOS6530_002
-    top->addr = 844;
+    top->addr = 0x34c;
     #endif
     #ifdef MOS6530_003
-    top->addr = 780;
+    top->addr = 0x30c;
     #endif
 
 
