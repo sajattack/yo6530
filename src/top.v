@@ -53,20 +53,19 @@ module top (
       phi1_io = ~phi2_io;
   end
 
-  reg OE;
+  wire OE;
 
-  reg [7:0] data_i;
+  wire [7:0] data_i;
   reg [7:0] data_o;
 
-  reg [7:0] porta_i;
+  wire [7:0] porta_i;
   reg [7:0] porta_o;
 
-  reg [7:0] portb_i;
+  wire [7:0] portb_i;
   reg [7:0] portb_o;
 
   reg [7:0] ddra;
   reg [7:0] ddrb;
-
   reg [9:0] addr;
 
   SB_IO #(
@@ -101,6 +100,20 @@ module top (
       .INPUT_CLK        (phi2_io),
       .D_IN_0           (we_n)
   );
+
+  SB_IO #(
+      .PIN_TYPE(6'b0000_10)
+  ) io_cs1 (
+      .PACKAGE_PIN      (CS1_PB6),
+      .LATCH_INPUT_VALUE(phi1_io),
+`ifdef VERILATOR
+      .CLOCK_ENABLE     (1'b1),
+`endif
+      .INPUT_CLK        (phi2_io),
+      .D_IN_0           (cs1)
+  );
+
+
 
   // Bidirectional data pins. Registered input and output enable.
   SB_IO #(
@@ -138,7 +151,6 @@ module top (
 wire cs1;
 reg dontcare;
 reg irq, irq_en;
-assign cs1 = CS1_PB6;
 
   // Bidirectional io port B. Registered input and output enable.
   SB_IO #(

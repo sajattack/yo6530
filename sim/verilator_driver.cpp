@@ -4,7 +4,7 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-#define MOS6530_003 1;
+#define MOS6530_002 1;
 
 static VerilatedVcdC *trace = nullptr;
 unsigned long tickcount = 0;

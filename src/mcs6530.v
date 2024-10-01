@@ -1,18 +1,18 @@
-`define MOS6530_003=1
+`define MOS6530_002=1
 
 module mcs6530 (
     input            phi2,
     input            rst_n,
     input            we_n,   // RW Read high/Write low
     input      [9:0] A,      // Address
-    input reg  [7:0] DI,     // Data to processor
-    output reg [7:0] DO,     // Data from processor
-    output reg      OE,     // Indicates data driven on DO
-    input            RS0,    // ROM select, might need to be inverted?
+    input      [7:0] DI,     // Data to 6530
+    output reg [7:0] DO,     // Data from 6530
+    output reg       OE,      // Indicates data driven on DO
+    input            RS0,    // ROM select
     output reg [7:0] PAO,    // port A output
-    input reg  [7:0] PAI,    // port A input
+    input [7:0] PAI,    // port A input
     output reg [7:0] PBO,    // port B output
-    input reg  [7:0] PBI,    // port B input
+    input [7:0] PBI,    // port B input
     output reg [7:0] DDRA,   // port A OE (data direction register)
     output reg [7:0] DDRB,   // port B OE (data direction register)
     input CS1,
@@ -57,6 +57,7 @@ module mcs6530 (
 
   ram ram0 (
       .clk(phi2),
+      .enable(ram_enable),
       .we_n(we_n),
       .A(A[5:0]),
       .DI(DI),
@@ -116,7 +117,7 @@ module mcs6530 (
       DO = io_do;
       OE = io_oe;
     end else begin
-      {OE, DO} = {1'b0, 8'bxxxxxxxx};
+      {OE, DO} = {1'b0, 8'hzz};
     end
   end
 

@@ -7,12 +7,12 @@ module io (
     input we_n,
     input [2:0] A,
     output reg [7:0] PAO,    // port A output
-    input reg [7:0] PAI,    // port A input
+    input [7:0] PAI,    // port A input
     output reg [7:0] PBO,    // port B output
-    input reg [7:0] PBI,    // port B input
+    input [7:0] PBI,    // port B input
     output reg [7:0] DDRA,   // port A OE (data direction register)
     output reg [7:0] DDRB,   // port B OE (data direction register)
-    input reg [7:0] DI,
+    input [7:0] DI,
     output reg [7:0] DO,
     output reg OE
 );
@@ -28,15 +28,16 @@ module io (
     end
   endgenerate
 
-  always_ff @(posedge clk) begin
+  always @(posedge clk) begin
     // dunno why this breaks it
     //if (~rst_n) begin
-        //PAO <= 8'd0;
+        //PAO <= 8'hzz;
         //DDRA <= 8'd0;
-        //PBO <= 8'd0;
+        //PBO <= 8'hzz;
         //DDRB <= 8'd0;
+        //{OE, DO} <= { 1'b0, 8'hzz};
     //end else begin
-        {OE, DO} <= { 1'b0, 8'bxx};
+        {OE, DO} <= { 1'b0, 8'hzz};
         if (enable) begin
             case ({
                 we_n, A[2:0]
@@ -49,7 +50,7 @@ module io (
                 4'b1_010: {OE, DO} <= {1'b1, PBI_int};  // Read port B
                 4'b0_011: DDRB <= DI;  // Write DDRB
                 4'b1_011: {OE, DO} <= {1'b1, DDRB};  // Read DDRB
-                default:  OE <= 1'b0;
+                default:  {OE, DO} <= {1'b0, 8'hzz};
             endcase
         end
     //end
