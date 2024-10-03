@@ -97,8 +97,8 @@ module mcs6530 (
       .PBI (PBI),
       .PAI (PAI),
       .PAO (PAO),
-      .DDRA (DDRA),
-      .DDRB (DDRB),
+      .PAOE(DDRA),
+      .PBOE (DDRB),
       .OE  (io_oe)
   );
 

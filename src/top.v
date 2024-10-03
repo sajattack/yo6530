@@ -56,17 +56,17 @@ module top (
   wire OE;
 
   wire [7:0] data_i;
-  reg [7:0] data_o;
+  wire [7:0] data_o;
 
   wire [7:0] porta_i;
-  reg [7:0] porta_o;
+  wire [7:0] porta_o;
 
   wire [7:0] portb_i;
-  reg [7:0] portb_o;
+  wire [7:0] portb_o;
 
-  reg [7:0] ddra;
-  reg [7:0] ddrb;
-  reg [9:0] addr;
+  wire [7:0] ddra;
+  wire [7:0] ddrb;
+  wire [9:0] addr;
 
   SB_IO #(
       .PIN_TYPE(6'b0000_01),
@@ -78,9 +78,10 @@ module top (
   );
 
   SB_IO #(
-      .PIN_TYPE(6'b0000_00)
+      .PIN_TYPE(6'b0000_10)
   ) io_res (
       .PACKAGE_PIN (RES),
+      .LATCH_INPUT_VALUE(phi1_io),
 `ifdef VERILATOR
       .CLOCK_ENABLE(1'b1),
 `endif
@@ -133,7 +134,7 @@ module top (
 
   // Bidirectional io port A. Registered input and output enable.
   SB_IO #(
-      .PIN_TYPE(6'b1110_10),
+      .PIN_TYPE(6'b1101_10),
       .PULLUP(1'b1)
   ) io_porta[7:0] (
       .PACKAGE_PIN      ({PA7, PA6, PA5, PA4, PA3, PA2, PA1, PA0}),
@@ -154,7 +155,7 @@ reg irq, irq_en;
 
   // Bidirectional io port B. Registered input and output enable.
   SB_IO #(
-      .PIN_TYPE(6'b1110_10),
+      .PIN_TYPE(6'b1101_10),
       .PULLUP(1'b1)
   ) io_portb[7:0] (
       .PACKAGE_PIN      ({IRQ_PB7, dontcare, CS2_PB5, PB4, PB3, PB2, PB1, PB0}),
