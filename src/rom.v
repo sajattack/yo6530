@@ -17,7 +17,7 @@ module rom (
 
   initial $readmemh(ROM_FILE, ROM1K);
 
-  always @(posedge clk) begin
+  always @(negedge clk) begin
     {OE, DO} <= {1'b1, ROM1K[A]};
   end
 

@@ -78,39 +78,33 @@ module top (
   );
 
   SB_IO #(
-      .PIN_TYPE(6'b0000_10)
+      .PIN_TYPE(6'b0000_01)
   ) io_res (
       .PACKAGE_PIN (RES),
-      .LATCH_INPUT_VALUE(phi1_io),
 `ifdef VERILATOR
       .CLOCK_ENABLE(1'b1),
 `endif
-      .INPUT_CLK   (phi2_io),
       .D_IN_0      (rst_n)
   );
 
   // R/W.
   SB_IO #(
-      .PIN_TYPE(6'b0000_10)
+      .PIN_TYPE(6'b0000_01)
   ) io_r_w_n (
       .PACKAGE_PIN      (R_W),
-      .LATCH_INPUT_VALUE(phi1_io),
 `ifdef VERILATOR
       .CLOCK_ENABLE     (1'b1),
 `endif
-      .INPUT_CLK        (phi2_io),
       .D_IN_0           (we_n)
   );
 
   SB_IO #(
-      .PIN_TYPE(6'b0000_10)
+      .PIN_TYPE(6'b0000_01)
   ) io_cs1 (
       .PACKAGE_PIN      (CS1_PB6),
-      .LATCH_INPUT_VALUE(phi1_io),
 `ifdef VERILATOR
       .CLOCK_ENABLE     (1'b1),
 `endif
-      .INPUT_CLK        (phi2_io),
       .D_IN_0           (cs1)
   );
 
@@ -118,15 +112,12 @@ module top (
 
   // Bidirectional data pins. Registered input and output enable.
   SB_IO #(
-      .PIN_TYPE(6'b1110_10)
+      .PIN_TYPE(6'b1010_01)
   ) io_data[7:0] (
       .PACKAGE_PIN      ({DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0}),
-      .LATCH_INPUT_VALUE(phi1_io),
 `ifdef VERILATOR
       .CLOCK_ENABLE     (1'b1),
 `endif
-      .INPUT_CLK        (phi2_io),
-      .OUTPUT_CLK       (phi2_io),
       .OUTPUT_ENABLE    (OE),
       .D_IN_0           (data_i),
       .D_OUT_0          (data_o)
@@ -134,16 +125,13 @@ module top (
 
   // Bidirectional io port A. Registered input and output enable.
   SB_IO #(
-      .PIN_TYPE(6'b1101_10),
+      .PIN_TYPE(6'b1010_01),
       .PULLUP(1'b1)
   ) io_porta[7:0] (
       .PACKAGE_PIN      ({PA7, PA6, PA5, PA4, PA3, PA2, PA1, PA0}),
-      .LATCH_INPUT_VALUE(phi1_io),
 `ifdef VERILATOR
       .CLOCK_ENABLE     (1'b1),
 `endif
-      .INPUT_CLK        (phi2_io),
-      .OUTPUT_CLK       (phi2_io),
       .OUTPUT_ENABLE    (ddra),
       .D_IN_0           (porta_i),
       .D_OUT_0          (porta_o)
@@ -155,16 +143,13 @@ reg irq, irq_en;
 
   // Bidirectional io port B. Registered input and output enable.
   SB_IO #(
-      .PIN_TYPE(6'b1101_10),
+      .PIN_TYPE(6'b1010_01),
       .PULLUP(1'b1)
   ) io_portb[7:0] (
       .PACKAGE_PIN      ({IRQ_PB7, dontcare, CS2_PB5, PB4, PB3, PB2, PB1, PB0}),
-      .LATCH_INPUT_VALUE(phi1_io),
 `ifdef VERILATOR
       .CLOCK_ENABLE     (1'b1),
 `endif
-      .INPUT_CLK        (phi2_io),
-      .OUTPUT_CLK       (phi2_io),
       .OUTPUT_ENABLE    ({irq_en ? 1'b1: ddrb[7], ddrb[6:0]}),
       .D_IN_0           (portb_i),
       .D_OUT_0          ({irq_en ? irq: portb_o[7], portb_o[6:0]})
@@ -173,14 +158,12 @@ reg irq, irq_en;
 
   // Address pin inputs.
   SB_IO #(
-      .PIN_TYPE(6'b0000_10)
+      .PIN_TYPE(6'b0000_01)
   ) io_addr[9:0] (
       .PACKAGE_PIN      ({A9, A8, A7, A6, A5, A4, A3, A2, A1, A0}),
-      .LATCH_INPUT_VALUE(phi1_io),
 `ifdef VERILATOR
       .CLOCK_ENABLE     (1'b1),
 `endif
-      .INPUT_CLK        (phi2_io),
       .D_IN_0           (addr)
   );
 

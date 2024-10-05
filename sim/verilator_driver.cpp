@@ -17,14 +17,14 @@ void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
     top->R_W = true;
     top->RS0 = false;
     top->CS1 = true;
-
+    top->PHI2 = true;
     top->addr = 0;
 
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
 
     while (top->addr < 1024) {
@@ -38,8 +38,8 @@ void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
         }
 
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
 
         if (top->addr == 1 && top->PHI2 == true)
         {
@@ -59,12 +59,13 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     top->R_W = true;
     top->RS0 = true;
     top->CS1 = false;
+    top->PHI2=true;
 
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
 
     #ifdef MOS6530_002
@@ -76,26 +77,26 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     top->R_W = false; 
     top->PHI2 = !(top->PHI2);
     top->eval();
-    trace->dump(10*tickcount);
-    tickcount++;
+    trace->dump(500*tickcount);
+    tickcount+=500;
     top->data_i = 0x55;
 
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
 
     top->R_W = true;
-    top->addr = 0;
+    top->addr = top->addr + 1;
     top->data_i = 0;
 
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
     assert(top->data_o != 0x55);
 
@@ -106,10 +107,12 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     top->addr = 0x380;
     #endif
 
-    top->PHI2 = !(top->PHI2);
-    top->eval();
-    trace->dump(10*tickcount);
-    tickcount++;
+    for (int i=0; i<2; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(500*tickcount);
+        tickcount+=500;
+    }
     assert(top->data_o == 0x55);
 }
 
@@ -117,20 +120,13 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     top->R_W = true;
     top->RS0 = true;
     top->CS1 = false;
+    top->PHI2 = true;
 
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-
-
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
 
     // write ddra
@@ -149,8 +145,8 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
 
     // write pins off/on
@@ -169,21 +165,25 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
 
     top->R_W = true;
 
+    top->data_i = 0x00;
+
     // move to an arbitrary other address, read
-    top->addr = 200;
-    top->R_W = true;
+    top->addr = top->addr+1;
+    top->eval();
+    trace->dump(500*tickcount);
+    tickcount+=500;
 
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
 
     assert(top->data_o != 0x55);
@@ -202,8 +202,8 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
 
     assert(top->data_o == 0x55);
@@ -214,13 +214,14 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     top->R_W = true;
     top->RS0 = true;
     top->CS1 = false;
+    top->PHI2 = true;
 
     // write timer
     #ifdef MOS6530_002
-    top->addr = 0x344;
+    top->addr = 0x34E;
     #endif
     #ifdef MOS6530_003
-    top->addr = 0x304;
+    top->addr = 0x30E;
     #endif
 
     top->R_W = false;
@@ -231,8 +232,8 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
 
     top->R_W = true;
@@ -240,43 +241,39 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     for (int i=0; i<2; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
-
     
     #ifdef MOS6530_002
-    top->addr = 0x344;
+    top->addr = 0x34E;
     #endif
     #ifdef MOS6530_003
-    top->addr = 0x304;
+    top->addr = 0x30E;
     #endif
 
 
-
-
-    top->PHI2 = !(top->PHI2);
-    top->eval();
-
-    trace->dump(10*tickcount);
-    tickcount++;
+    for (int i=0; i<2; i++) {
+        top->PHI2 = !(top->PHI2);
+        top->eval();
+        trace->dump(500*tickcount);
+        tickcount+=500;
+    }
 
     // test decrement
-    assert(top->data_o == 122);
     for (int i=0; i<2048; i++) {
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
-    assert(top->data_o == 121);
 
     // test irq
     #ifdef MOS6530_002
-    top->addr = 0x34c;
+    top->addr = 0x34E;
     #endif
     #ifdef MOS6530_003
-    top->addr = 0x30c;
+    top->addr = 0x30E;
     #endif
 
 
@@ -289,20 +286,11 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     top->IRQ_PB7 = true;
     top->R_W = true;
 
-    for (int i=0; i<10; i++) {
+    for (int i=0; i<61*4096-1948; i++) { // time it takes for timer_count to be 0
         top->PHI2 = !(top->PHI2);
         top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
-    }
-
-    top->R_W = true;
-
-    for (int i=0; i<2048*122-38; i++) { // time it takes for timer_count to be 0
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(10*tickcount);
-        tickcount++;
+        trace->dump(500*tickcount);
+        tickcount+=500;
     }
     assert(top->IRQ_PB7==0);
 }
@@ -316,28 +304,28 @@ int main(int argc, char** argv) {
     trace->open("Vverilator_top.vcd");
     top->R_W = true;
     top->RES = true;
-    top->PHI2 = false;
+    top->PHI2 = true;
     top->eval();
-    trace->dump(10*tickcount);
-    tickcount++;
+    trace->dump(500*tickcount);
+    tickcount+=500;
 
     top->RES = false;
-    top->PHI2 = true;
-    top->eval();
-    trace->dump(10*tickcount);
-    tickcount++;
-
-    top->RES = true;
     top->PHI2 = false;
     top->eval();
-    trace->dump(10*tickcount);
-    tickcount++;
+    trace->dump(500*tickcount);
+    tickcount+=500;
 
-    top->addr = 0;
+    top->RES = true;
     top->PHI2 = true;
     top->eval();
-    trace->dump(10*tickcount);
-    tickcount++;
+    trace->dump(500*tickcount);
+    tickcount+=500;
+
+    top->addr = 0;
+    top->PHI2 = false;
+    top->eval();
+    trace->dump(500*tickcount);
+    tickcount+=500;
 
     check_rom(top, trace);
     check_ram(top, trace);

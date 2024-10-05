@@ -26,7 +26,7 @@ module io (
     end
   endgenerate
 
-  always_ff @(posedge clk)
+  always @(negedge clk)
     if (~rst_n) begin
       PAO  <= 8'd0;
       PAOE <= 8'd0;

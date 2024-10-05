@@ -15,7 +15,7 @@ module timer (
   reg [9:0] timer_count;
   reg [7:0] timer;
 
-  always @(posedge clk) begin
+  always @(negedge clk) begin
     irq <= 1'd1;
     // reset logic
     if (~rst_n) begin

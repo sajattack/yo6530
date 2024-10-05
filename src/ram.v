@@ -10,7 +10,7 @@ module ram (
 
   reg [7:0] RAM64[64];
 
-  always @(posedge clk) begin
+  always @(negedge clk) begin
     if (enable) begin
         if (~we_n) begin
             {OE, RAM64[A]} <= {1'b0, DI};
