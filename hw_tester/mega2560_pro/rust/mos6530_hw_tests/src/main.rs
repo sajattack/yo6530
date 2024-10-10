@@ -14,9 +14,26 @@
 /// CS1 PH0
 /// IO PORTS PC0-5 PK0-7
 
-use panic_halt as _;
+use panic_serial as _;
+
+panic_serial::impl_panic_handler!(
+  // This is the type of the UART port to use for printing the message:
+  arduino_hal::usart::Usart<
+    arduino_hal::pac::USART0,
+    arduino_hal::port::Pin<arduino_hal::port::mode::Input, arduino_hal::hal::port::PE0>,
+    arduino_hal::port::Pin<arduino_hal::port::mode::Output, arduino_hal::hal::port::PE1>
+  >
+);
+
+extern crate alloc;
+
+use alloc::vec::Vec;
+
+use core::{time::Duration, convert::Infallible};
 
 use arduino_hal::{
+    Pins,
+    Peripherals,
     pac::{
         PORTA,
         PORTB,
@@ -27,8 +44,14 @@ use arduino_hal::{
         PORTG,
         PORTD,
         TC1, USART0, EXINT,
+        SPI,
     }, hal::{Usart, Atmega, port::{PE0, PE1}}, port::{Pin, mode::{Input, Output}}, clock::MHz16
 };
+
+use arduino_hal::hal::spi::{self, Spi, SpiOps};
+use spi_flash::Flash;
+use embedded_hal::{spi::SpiDevice, spi::SpiBus , digital::OutputPin};
+use embedded_hal_bus::spi::ExclusiveDevice;
 
 static ROM_002: [u8; 1024] = *include_bytes!("../../../../../roms/6530-002.bin");
 static ROM_003: [u8; 1024] = *include_bytes!("../../../../../roms/6530-003.bin");
@@ -43,25 +66,32 @@ fn INT0() {
 
 #[arduino_hal::entry]
 fn main() -> ! {
-    let dp = arduino_hal::Peripherals::take().unwrap();
+    let mut dp = arduino_hal::Peripherals::take().unwrap();
     let pins = arduino_hal::hal::pins!(dp);
+
+
     let mut serial = arduino_hal::hal::usart::Usart0::new(dp.USART0, pins.pe0.into(), pins.pe1.into_output(), arduino_hal::usart::Baudrate::<arduino_hal::hal::clock::MHz16>::new(115200));
-    let dp = unsafe { arduino_hal::Peripherals::steal() };
-    let mut timer = dp.TC1;
-    let mut porta = dp.PORTA;
-    let mut portb = dp.PORTB;
-    let mut portk = dp.PORTK;
-    let mut portf = dp.PORTF;
-    let mut porth = dp.PORTH;
-    let mut portg = dp.PORTG;
-    let mut portd = dp.PORTD;
-    let mut exint = dp.EXINT;
+    let mut serial = share_serial_port_with_panic(serial);
+
+    let mut dp2 = unsafe { arduino_hal::Peripherals::steal() };
+
+
+    let mut timer = dp2.TC1;
+    let mut porta = dp2.PORTA;
+    let mut portb = dp2.PORTB;
+    let mut portk = dp2.PORTK;
+    let mut portf = dp2.PORTF;
+    let mut porth = dp2.PORTH;
+    let mut portg = dp2.PORTG;
+    let mut portd = dp2.PORTD;
+    let mut exint = dp2.EXINT;
 
     // disable pull-ups
     //dp.CPU.mcucr.modify(|_, w| { w.pud().set_bit()});
     
     loop {
-        ufmt::uwriteln!(serial, "Press 2 or 3 to test MOS6530-002 or MOS6530-003\r");
+        ufmt::uwriteln!(serial, "Press 2 or 3 to test MOS6530-002 or MOS6530-003\r").unwrap();
+        ufmt::uwriteln!(serial, "Press p to reprogram").unwrap();
 
         let input = serial.read_byte();
 
@@ -69,19 +99,29 @@ fn main() -> ! {
         toggle_reset(&mut portb);
 
         if input == b'2' {
-            test_rom_002(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
-            test_ram_002(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
-            test_io_002(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut portk, &mut serial);
-            test_timer_002(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut exint, &mut serial);
+            test_rom_002(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, serial);
+            test_ram_002(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, serial);
+            test_io_002(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut portk, serial);
+            test_timer_002(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut exint, serial);
         } 
 
         else if input == b'3' {
-            test_rom_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
-            test_ram_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut serial);
-            test_io_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut portk, &mut serial);
-            test_timer_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut exint, &mut serial);
+            test_rom_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, serial);
+            test_ram_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, serial);
+            test_io_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut portk, serial);
+            test_timer_003(&mut porta, &mut portb, &mut portf, &mut portg, &mut porth, &mut exint, serial);
         }
-        ufmt::uwriteln!(serial, "\r");
+
+        else if input == b'p' {
+            let dp3 = unsafe { arduino_hal::Peripherals::steal() };
+            reprogram(dp3);
+        }
+
+        dp2 = unsafe { arduino_hal::Peripherals::steal() };
+
+        let pins = arduino_hal::hal::pins!(dp2);
+        serial = share_serial_port_with_panic(arduino_hal::hal::usart::Usart0::new(dp2.USART0, pins.pe0.into(), pins.pe1.into_output(), arduino_hal::usart::Baudrate::<arduino_hal::hal::clock::MHz16>::new(115200)));
+        ufmt::uwriteln!(serial, "\r").unwrap();
     }
 }
 
@@ -231,7 +271,7 @@ fn test_rom(
         w.ph0().set_bit()  // CS1
     });
 
-    ufmt::uwriteln!(serial, "ROM read start\r");
+    ufmt::uwriteln!(serial, "ROM read start\r").unwrap();
     let mut error_count = 0;
     for addr in 0..rom.len() {
         let byte_read = bus_read(porta, portf, portg, porth, addr as u16);
@@ -528,3 +568,85 @@ fn bus_read(
     read_data(porta)
 }
 
+fn reprogram(
+    dp: Peripherals,  
+) {
+    let pins = arduino_hal::pins!(dp);
+    let (spi, cs) = Spi::new(dp.SPI, pins.d52.into_output(), pins.d51.into_output(), pins.d50.into_pull_up_input(), pins.d53.into_output(), spi::Settings::default());
+    let mut spi = ExclusiveDevice::new(spi, cs, arduino_hal::Delay::new()).unwrap();
+    let mut spi = spi.bus_mut();
+    let mut serial = arduino_hal::hal::usart::Usart0::new(dp.USART0, pins.d0.into_pull_up_input(), pins.d1.into_output(), arduino_hal::usart::Baudrate::<arduino_hal::hal::clock::MHz16>::new(115200));
+    let mut interface = SpiFlashInterface::new(spi);
+    let mut spi_flash = Flash::new(&mut interface);
+    let result = spi_flash.erase();
+    if result.is_err() {
+        ufmt::uwriteln!(&mut serial, "Flash Erase Error\r");
+    } else {
+        ufmt::uwriteln!(&mut serial, "Flash Erase Success\r");
+    }
+    let result = spi_flash.program(0, &[0x55; 1], true);
+    if result.is_err() {
+        ufmt::uwriteln!(&mut serial, "Flash Verify Error\r");
+    } else {
+        ufmt::uwriteln!(&mut serial, "Flash Verify Success\r");
+    }
+}
+
+use buddy_alloc::{BuddyAllocParam, FastAllocParam, NonThreadsafeAlloc};
+
+const FAST_HEAP_SIZE: usize = 64; 
+const HEAP_SIZE: usize = 1024;
+
+pub static mut FAST_HEAP: [u8; FAST_HEAP_SIZE] = [0u8; FAST_HEAP_SIZE];
+pub static mut HEAP: [u8; HEAP_SIZE] = [0u8; HEAP_SIZE];
+
+// This allocator can't work in tests since it's non-threadsafe.
+#[cfg_attr(not(test), global_allocator)]
+static ALLOC: NonThreadsafeAlloc = unsafe {
+    let fast_param = FastAllocParam::new(FAST_HEAP.as_ptr(), FAST_HEAP_SIZE);
+    let buddy_param = BuddyAllocParam::new(HEAP.as_ptr(), HEAP_SIZE, 16);
+    NonThreadsafeAlloc::new(fast_param, buddy_param)
+};
+
+struct SpiFlashInterface<'a> {
+    spi: &'a mut Spi,
+}
+
+impl<'a> SpiFlashInterface<'a> {
+    fn new(spi: &'a mut Spi) -> Self {
+        Self {
+            spi
+        }
+    }
+}
+
+impl<'a> spi_flash::FlashAccess for SpiFlashInterface<'a> {
+    type Error = spi_flash::Error;
+
+    fn exchange(&mut self, data: &[u8]) -> Result<Vec<u8>, Self::Error> 
+    {
+        let mut read_vec = Vec::new();
+        read_vec.resize(8, 0);
+        let result = self.spi.transfer(read_vec.as_mut(), data);
+        match result {
+            Ok(()) => Ok(read_vec),
+            Err(_e) => Err(spi_flash::Error::Access)
+        }
+    }
+
+    fn write(&mut self, data: &[u8]) -> Result<(), Self::Error> {
+        let _ = self.spi.write(data);
+        Ok(())
+    }
+
+    fn delay(&mut self, duration: Duration) {
+        // this has pretty horrible accuracy but yolo
+        if duration.as_micros() < 1000 
+        {
+            arduino_hal::delay_us(duration.as_micros() as u32);
+        }
+        else {
+            arduino_hal::delay_ms(duration.as_millis() as u16);
+        }
+    }
+}

@@ -13,9 +13,12 @@ bench = false
 [dependencies]
 ufmt = "0.2.0"
 nb = "0.1.2"
-embedded-hal = "0.2.3"
-panic-halt = "0.2.0"
+embedded-hal = "1.0.0"
+panic-serial = { version = "0.1.1", features=["full"] }
 avr-device = "0.5.4"
+spi-flash = {version = "0.3.0", default-features=false}
+buddy-alloc = "0.5.1"
+embedded-hal-bus = "0.2.0"
 
 [dependencies.arduino-hal]
 git = "https://github.com/rahix/avr-hal"

@@ -6,4 +6,4 @@ rustflags = "-Cpanic=abort"
 runner = "ravedude mega2560 -cb 115200 -P /dev/ttyUSB0"
 
 [unstable]
-build-std = ["panic_abort", "core"]
+build-std = ["panic_abort", "core", "alloc"]
