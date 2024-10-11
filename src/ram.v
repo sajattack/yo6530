@@ -9,13 +9,29 @@ module ram (
 );
 
   reg [7:0] RAM64[64];
+  reg [7:0] reg_data;
+  reg [5:0] reg_addr;
 
   always @(negedge clk) begin
+    if (enable && ~we_n) begin
+        RAM64[reg_addr] <= DI;
+    end
+  end
+
+  always@(posedge clk) begin
     if (enable) begin
-        if (~we_n) begin
-            {OE, RAM64[A]} <= {1'b0, DI};
+       reg_addr <= A;
+       reg_data <= RAM64[A];    
+    end
+  end
+
+  always_comb begin
+    OE = 1'b0;
+    DO = 8'hxx;
+    if (enable) begin
+        if (we_n) begin
+            {OE, DO} = {1'b1, reg_data};
         end
-        else {OE, DO[7:0]} <= {1'b1, RAM64[A]};
     end
   end
 

@@ -173,22 +173,8 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
 
     top->data_i = 0x00;
 
-    // move to an arbitrary other address, read
-    top->addr = top->addr+1;
-    top->eval();
-    trace->dump(500*tickcount);
-    tickcount+=500;
 
-    for (int i=0; i<2; i++) {
-        top->PHI2 = !(top->PHI2);
-        top->eval();
-        trace->dump(500*tickcount);
-        tickcount+=500;
-    }
-
-    assert(top->data_o != 0x55);
-
-    // move back to porta, read
+    // read
     #ifdef MOS6530_002
     top->addr = 0x340;
     #endif

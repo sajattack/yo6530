@@ -67,14 +67,15 @@ module mcs6530 (
 
   rom rom0 (
       .clk(phi2),
+      .enable(rom_enable),
       .A  (A),
       .DO (rom_do),
       .OE (rom_oe)
   );
 
   timer timer0 (
-      .enable (timer_enable),
       .clk  (phi2),
+      .enable (timer_enable),
       .rst_n  (rst_n),
       .we_n  (we_n),
       .A  ({A [ 3 ], A [1:0] }),
@@ -87,9 +88,9 @@ module mcs6530 (
 
   io io0 (
       .clk  (phi2),
+      .enable(io_enable),
       .rst_n(rst_n),
       .we_n  (we_n),
-      .enable(io_enable),
       .A  (A [2:0] ),
       .DI  (DI),
       .DO  (io_do),
