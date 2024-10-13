@@ -512,7 +512,7 @@ fn bus_write(
         w.ph1().clear_bit()
     });
 
-    arduino_hal::delay_us(1);
+    //arduino_hal::delay_us(1);
 
     write_addr(portf, portg, addr);
 
