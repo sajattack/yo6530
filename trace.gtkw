@@ -1,10 +1,10 @@
 [*]
 [*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Fri Sep 13 04:59:14 2024
+[*] Sun Oct 13 20:53:22 2024
 [*]
 [dumpfile] "/home/paul/projects/fpga/yo6530/Vverilator_top.vcd"
-[dumpfile_mtime] "Fri Sep 13 04:58:26 2024"
-[dumpfile_size] 4788405
+[dumpfile_mtime] "Sun Oct 13 20:50:33 2024"
+[dumpfile_size] 5531415
 [savefile] "/home/paul/projects/fpga/yo6530/trace.gtkw"
 [timestart] 0
 [size] 2560 1497
@@ -17,23 +17,16 @@
 [signals_width] 120
 [sst_expanded] 1
 [sst_vpaned_height] 464
+@28
+TOP.verilator_top.mcs6530.rst_n
+TOP.PHI2_2X
+TOP.verilator_top.mcs6530.we_n
+TOP.verilator_top.mcs6530.phi2
 @22
 TOP.verilator_top.mcs6530.A[9:0]
 TOP.verilator_top.mcs6530.DO[7:0]
 TOP.verilator_top.mcs6530.DI[7:0]
 @28
-TOP.verilator_top.mcs6530.phi2
-TOP.verilator_top.mcs6530.RS0
-@22
-TOP.verilator_top.mcs6530.PBO[7:0]
-TOP.verilator_top.mcs6530.PAO[7:0]
-@28
-TOP.verilator_top.mcs6530.rst_n
-TOP.verilator_top.mcs6530.we_n
 TOP.verilator_top.mcs6530.OE
-TOP.IRQ_PB7
-TOP.verilator_top.mcs6530.timer0.irq
-@29
-TOP.verilator_top.mcs6530.timer0.irq_en
 [pattern_trace] 1
 [pattern_trace] 0

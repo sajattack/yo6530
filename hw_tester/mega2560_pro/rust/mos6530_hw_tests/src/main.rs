@@ -2,6 +2,7 @@
 #![no_main]
 
 #![feature(abi_avr_interrupt)]
+#![feature(asm_experimental_arch)]
 /// MOS 6530 Chip Tester
 ///
 /// Data bus PA0-PA7
@@ -511,8 +512,6 @@ fn bus_write(
     porth.porth.modify(|_, w| {
         w.ph1().clear_bit()
     });
-
-    //arduino_hal::delay_us(1);
 
     write_addr(portf, portg, addr);
 

@@ -41,7 +41,7 @@ module verilator_top (
     inout IRQ_PB7,
     input R_W,
 
-    input PHI2,
+    input PHI2_2X,
     input RES,
 
     input [7:0] data_i,
@@ -51,8 +51,8 @@ module verilator_top (
     output reg [7:0] porta_o,
     output reg [7:0] portb_o,
     output reg [7:0] ddra,
-    output reg [7:0] ddrb
-
+    output reg [7:0] ddrb,
+    output reg PHI2
 );
 
   wire we_n;
@@ -108,6 +108,9 @@ module verilator_top (
     portb_i[0] = !ddrb[0] ? PB0 : 1'bz;
   end
 
+  always @(posedge PHI2_2X) begin
+      PHI2 <= ~PHI2;
+  end
 
   mcs6530 mcs6530 (
       .phi2(PHI2),
