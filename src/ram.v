@@ -27,7 +27,7 @@ module ram (
 
   always_comb begin
     OE = 1'b0;
-    DO = 8'hxx;
+    DO = 8'h00;
     if (enable) begin
         if (we_n) begin
             {OE, DO} = {1'b1, reg_data};

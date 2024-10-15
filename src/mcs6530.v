@@ -118,7 +118,7 @@ module mcs6530 (
       DO = io_do;
       OE = io_oe;
     end else begin
-      {OE, DO} = {1'b0, 8'hzz};
+      {OE, DO} = {1'b0, 8'h00};
     end
   end
 
