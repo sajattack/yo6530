@@ -1,5 +1,3 @@
-`define MOS6530_002=1
-
 module mcs6530 (
     input            phi2,
     input            rst_n,
@@ -42,12 +40,12 @@ module mcs6530 (
 
   always_comb begin
     rom_enable = rst_n & !RS0 & CS1;
-    `ifdef MOS6530_002
+    `ifdef MCS6530_002
         ram_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & A[6];
         io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & A[6] & ~A[2];
         timer_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & A[6] & A[2];
     `endif
-    `ifdef MOS6530_003
+    `ifdef MCS6530_003
         ram_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & ~A[6];
         io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & ~A[6] & ~A[2];
         timer_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & ~A[6] & A[2];

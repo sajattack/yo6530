@@ -29,7 +29,7 @@ https://github.com/daglem/redip-riot
 | GPIO24 / 18         | CRESET / 4       |
 
 ```sh
-make # build the project
+make MCS6530_002=1 # build the project
 scp build/mcs6530.bin pi@<your-pi's-ip>: # copy the build artifact to the pi for flashing
 ssh pi@<your-pi's-ip> # connect to the pi
 sudo raspi-config # go into the interfaces menu and enable spi after running this command
@@ -42,7 +42,7 @@ pinctrl set 24 ip pu # exit programming mode by returning creset to input pullup
 
 ## Building and running the simulation tests
 ```sh
-make sim
+make MCS6530_002=1 sim
 ./obj_dir/Vverilator_top # this will throw assertion errors if the tests fail
 ```
 Also you can examine the logic signals output during the test in the Vverilator_top.vcd file using [GTKWave](https://gtkwave.sourceforge.net/)

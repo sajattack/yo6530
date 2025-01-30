@@ -4,8 +4,6 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-#define MOS6530_002 1;
-
 static VerilatedVcdC *trace = nullptr;
 unsigned long tickcount = 0;
 
@@ -67,10 +65,10 @@ void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
 
             if (top->addr == 1 && top->PHI2 == true)
             {
-                #ifdef MOS6530_002
+                #ifdef MCS6530_002
                 assert(top->data_o==0xf3);
                 #endif
-                #ifdef MOS6530_003
+                #ifdef MCS6530_003
                 assert(top->data_o==0xad);
                 #endif
             }
@@ -91,10 +89,10 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount+=250;
     }
 
-    #ifdef MOS6530_002
+    #ifdef MCS6530_002
     top->addr = 0x3c0;
     #endif
-    #ifdef MOS6530_003
+    #ifdef MCS6530_003
     top->addr = 0x380;
     #endif
 
@@ -131,10 +129,10 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     }
     assert(top->data_o != 0x55);
 
-    #ifdef MOS6530_002
+    #ifdef MCS6530_002
     top->addr = 0x3c0;
     #endif
-    #ifdef MOS6530_003
+    #ifdef MCS6530_003
     top->addr = 0x380;
     #endif
 
@@ -164,10 +162,10 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
 
     // write ddra
 
-    #ifdef MOS6530_002
+    #ifdef MCS6530_002
     top->addr = 0x341;
     #endif
-    #ifdef MOS6530_003
+    #ifdef MCS6530_003
     top->addr = 0x301;
     #endif
 
@@ -184,10 +182,10 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
 
     // write pins off/on
 
-    #ifdef MOS6530_002
+    #ifdef MCS6530_002
     top->addr = 0x340;
     #endif
-    #ifdef MOS6530_003
+    #ifdef MCS6530_003
     top->addr = 0x300;
     #endif
 
@@ -208,10 +206,10 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
 
 
     // read
-    #ifdef MOS6530_002
+    #ifdef MCS6530_002
     top->addr = 0x340;
     #endif
-    #ifdef MOS6530_003
+    #ifdef MCS6530_003
     top->addr = 0x300;
     #endif
 
@@ -235,10 +233,10 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     top->PHI2 = false;
 
     // write timer
-    #ifdef MOS6530_002
+    #ifdef MCS6530_002
     top->addr = 0x34E;
     #endif
-    #ifdef MOS6530_003
+    #ifdef MCS6530_003
     top->addr = 0x30E;
     #endif
 

@@ -6,11 +6,11 @@ module rom (
     output reg [7:0] DO
 );
 
-  `ifdef MOS6530_002
+  `ifdef MCS6530_002
   parameter ROM_FILE = "roms/6530-002.hex";
   `endif
 
-  `ifdef MOS6530_003
+  `ifdef MCS6530_003
   parameter ROM_FILE = "roms/6530-003.hex";
   `endif
 

@@ -1,3 +1,6 @@
+`ifndef __TOP__
+`define __TOP__
+
 module top (
     input A0,
     input A1,
@@ -190,3 +193,4 @@ reg irq, irq_en;
 
 endmodule
 
+`endif //__TOP__

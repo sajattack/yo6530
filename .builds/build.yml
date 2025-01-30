@@ -7,7 +7,11 @@ tasks:
   - build: |
       source /opt/oss-cad-suite/environment
       cd yo6530
-      make
-      truncate -s 128K build/mcs6530.bin
+      make MCS6530_002=1
+      truncate -s 128K build/mcs6530_002.bin
+      make MCS6530_003=1
+      truncate -s 128K build/mcs6530_003.bin
+
 artifacts: 
-  - yo6530/build/mcs6530.bin
+  - yo6530/build/mcs6530_002.bin
+  - yo6530/build/mcs6530_003.bin
