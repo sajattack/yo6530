@@ -1,5 +1,7 @@
 ![yo6530 running a KIM-1 replica](img/yo6530.jpg)
 
+[![build status](https://builds.sr.ht/~sajattack/yo6530.svg)](https://builds.sr.ht/~sajattack/yo6530?)
+
 ## Dependencies
 - FPGA Toolchain: https://github.com/YosysHQ/oss-cad-suite-build
 - Simulator: https://verilator.org/guide/latest/install.html
