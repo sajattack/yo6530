@@ -1,0 +1,13 @@
+image: archlinux
+packages: 
+  - oss-cad-suite-build-bin
+sources: 
+  - https://git.sr.ht/~sajattack/yo6530
+tasks:
+  - build: |
+      source /opt/oss-cad-suite/environment
+      cd yo6530
+      make
+      truncate -s 128K build/mcs6530.bin
+artifacts: 
+  - yo6530/build/mcs6530.bin
