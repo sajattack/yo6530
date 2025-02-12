@@ -1,4 +1,6 @@
-module mcs6530 (
+module mcs6530 #(
+    parameter CHIP_VERSION
+) (
     input            phi2,
     input            rst_n,
     input            we_n,   // RW Read high/Write low
@@ -40,17 +42,15 @@ module mcs6530 (
 
   always_comb begin
     rom_enable = rst_n & !RS0 & CS1;
-    `ifdef MCS6530_002
+    if (CHIP_VERSION == 2) begin
         ram_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & A[6];
         io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & A[6] & ~A[2];
         timer_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & A[6] & A[2];
-    `endif
-    `ifdef MCS6530_003
+    end else if (CHIP_VERSION == 3) begin
         ram_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & ~A[6];
         io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & ~A[6] & ~A[2];
         timer_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & ~A[6] & A[2];
-    `endif
-
+    end
   end
 
   ram ram0 (
@@ -62,8 +62,10 @@ module mcs6530 (
       .DO(ram_do),
       .OE(ram_oe)
   );
-
-  rom rom0 (
+  
+  rom #(
+      .ROM_CHIP_VERSION(CHIP_VERSION)
+  ) rom0 (
       .clk(phi2),
       .enable(rom_enable),
       .A  (A),

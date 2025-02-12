@@ -1,4 +1,6 @@
-module rom (
+module rom #(
+    parameter ROM_CHIP_VERSION
+) (
     input clk,
     input enable,
     input [9:0] A,
@@ -6,17 +8,13 @@ module rom (
     output reg [7:0] DO
 );
 
-  `ifdef MCS6530_002
-  parameter ROM_FILE = "roms/6530-002.hex";
-  `endif
-
-  `ifdef MCS6530_003
-  parameter ROM_FILE = "roms/6530-003.hex";
-  `endif
-
   reg [7:0] ROM1K[1024];
 
-  initial $readmemh(ROM_FILE, ROM1K);
+  if (ROM_CHIP_VERSION == 2) begin: gen_rom2
+    initial $readmemh("roms/6530-002.hex", ROM1K);
+  end else if (ROM_CHIP_VERSION == 3) begin: gen_rom3
+    initial $readmemh("roms/6530-003.hex", ROM1K);
+  end
 
   reg [7:0] reg_data;
 

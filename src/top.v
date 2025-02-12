@@ -50,9 +50,9 @@ module top (
   wire we_n;
   wire rst_n;
   wire phi2_io;
-  logic phi1_io;
+  reg phi1_io;
 
-  always_comb begin
+  always @* begin
       phi1_io = ~phi2_io;
   end
 
@@ -170,8 +170,17 @@ reg irq, irq_en;
       .D_IN_0           (addr)
   );
 
+// expand this width later
+wire [2:0] chip_version;
 
-  mcs6530 mcs6530 (
+  mcs6530 #(
+    `ifdef MCS6530_002
+      .CHIP_VERSION(2)
+    `endif 
+    `ifdef MCS6530_003
+      .CHIP_VERSION(3)
+    `endif
+  ) mcs6530_instance (
       .phi2(phi2_io),
       .rst_n(rst_n),
       .we_n(we_n),
