@@ -2,7 +2,7 @@ PROJ=mcs6530
 BUILD_DIR=build
 DRAW_DIR=draw
 SRC_DIR=src
-SRCS=top.v mcs6530.v timer.v io.v ram.v rom.v
+SRCS=top.v mcs6530.v ram.v rom.v io.v timer.v
 SEED=1337
 DEVICE=up5k
 PACKAGE=sg48
@@ -10,7 +10,6 @@ BOARD=redip-rriot
 
 MCS6530_002 ?= 1
 MCS6530_003 ?= 0
-
 
 ifeq "$(MCS6530_003)" "1"
 	FLG = -DMCS6530_003

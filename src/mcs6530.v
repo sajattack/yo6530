@@ -1,5 +1,6 @@
+
 module mcs6530 #(
-    parameter CHIP_VERSION
+    parameter CHIP_VERSION = 2
 ) (
     input            phi2,
     input            rst_n,
@@ -63,8 +64,9 @@ module mcs6530 #(
       .OE(ram_oe)
   );
   
+  if (CHIP_VERSION == 2) begin: _gen_rom2
   rom #(
-      .ROM_CHIP_VERSION(CHIP_VERSION)
+      .ROM_CHIP_VERSION(2)
   ) rom0 (
       .clk(phi2),
       .enable(rom_enable),
@@ -72,6 +74,17 @@ module mcs6530 #(
       .DO (rom_do),
       .OE (rom_oe)
   );
+  end else if (CHIP_VERSION == 3) begin: _gen_rom3
+  rom #(
+      .ROM_CHIP_VERSION(3)
+  ) rom0 (
+      .clk(phi2),
+      .enable(rom_enable),
+      .A  (A),
+      .DO (rom_do),
+      .OE (rom_oe)
+  );
+  end
 
   timer timer0 (
       .clk  (phi2),

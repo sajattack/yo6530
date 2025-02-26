@@ -2,6 +2,7 @@ build/
 Vverilator_top.vcd
 obj_dir/
 draw/
+bin/
 **/target/
 **/chip_tester-backups/*
 *.lck

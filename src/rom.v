@@ -1,5 +1,5 @@
 module rom #(
-    parameter ROM_CHIP_VERSION
+    parameter ROM_CHIP_VERSION = 2
 ) (
     input clk,
     input enable,
