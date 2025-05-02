@@ -36,9 +36,11 @@ module timer (
         timer_divider <= 10'd0;
         timer_count <= 10'd0;
         timer <= 8'd0;
+        irq <= 1'b0;
+        irq_en <= 1'b0;
     end else begin  
         if (enable) begin  
-            irq <= 1'b1;
+            irq <= 1'b0; // interrupt is reset whenever read or written
             irq_en <= reg_addr[2]; 
             if (~we_n) begin
             // write timer counter
@@ -54,7 +56,7 @@ module timer (
         end
 
         if (timer == 8'd0) begin
-            irq <= ~(irq_en & 1'd1); // trigger irq if enabled when timer reaches 0
+            irq <= ~(irq_en & 1'b1); // trigger irq if enabled when timer reaches 0
             timer_count <= timer_count + 1;
         end else begin
         // increment the count
