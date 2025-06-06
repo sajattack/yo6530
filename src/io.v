@@ -62,11 +62,11 @@ module io (
           we_n, A[2:0]
         })
           4'b0_000: ;
-          4'b1_000: reg_data <= PAI_int;  // Read port A
+          4'b1_000: reg_data <= ~PAI_int;  // Read port A
           4'b0_001: ;
           4'b1_001: reg_data <= PAOE;  // Read DDRA
           4'b0_010: ;
-          4'b1_010: reg_data <= PBI_int;  // Read port B
+          4'b1_010: reg_data <= ~PBI_int;  // Read port B
           4'b0_011: ;
           4'b1_011: reg_data <= PBOE;  // Read DDRB
           default:  ;

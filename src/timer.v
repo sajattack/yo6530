@@ -4,11 +4,11 @@ module timer (
     input            rst_n,
     input            we_n,   // RW Read high/Write low
     input      [2:0] A,      // Address
-    input      [7:0] DI,     // Data to processor
-    output reg [7:0] DO,     // Data from processor
+    input      [7:0] DI,     // Data from processor
+    output reg [7:0] DO,     // Data to processor
     output reg       OE,     // Indicates data driven on DO
     output reg       irq,
-    output reg irq_en
+    output reg       irq_en
 );
 
   reg [9:0] timer_divider;
@@ -24,9 +24,9 @@ module timer (
         reg_addr <= A;
         if (we_n) begin
             if (~A[0]) begin
-                reg_data <= timer;
+                reg_data <= timer_count_reg;
             end else begin
-                reg_data <= {irq, 7'd0};
+                reg_data <= {~irq, 7'd0};
             end
         end
      end
@@ -37,16 +37,16 @@ module timer (
         timer_divider <= 10'd0;
         timer <= 10'd0;
         timer_count_reg_in <= 8'd0;
-        irq <= 1'b0;
+        irq <= 1'b1;
         irq_en <= 1'b0;
     end else begin  
         if (enable) begin  
-            irq <= 1'b0; // interrupt is reset whenever read or written
+            irq <= 1'b1; // interrupt is reset whenever read or written
             irq_en <= reg_addr[2]; 
             if (~we_n) begin
             // write timer counter
-                timer_count_reg_in <= DI - 1 + 12;
-                timer_count_reg <= DI - 1 + 12;
+                timer_count_reg_in <= DI;
+                timer_count_reg <= DI;
                 // write divider based on address lines
                 case (reg_addr[1:0])
                     2'b00:   timer_divider <= 10'd0;
@@ -58,8 +58,10 @@ module timer (
         end
 
         if (timer_count_reg == 8'd0) begin
-            irq <= ~(irq_en & 1'b1); // trigger irq if enabled when timer reaches 0
+            irq <= 1'b0; // assert irq when timer reaches 0
             timer <= timer + 1;
+            // After interrupt, the timer register decrements at a divide by "1" rate of the system clock.
+            //timer_divider <= 10'd0;
         end else begin
         // increment the timer
             timer <= timer + 1;

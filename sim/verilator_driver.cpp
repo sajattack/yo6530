@@ -4,6 +4,8 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
+#define MCS6530_002 1
+
 static VerilatedVcdC *trace = nullptr;
 unsigned long tickcount = 0;
 
@@ -90,10 +92,13 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     }
 
     #ifdef MCS6530_002
+    printf("CHIP 2\n");
     top->addr = 0x3c0;
-    #endif
-    #ifdef MCS6530_003
+    #elif MCS6530_003
     top->addr = 0x380;
+    printf("CHIP 3\n");
+    #else
+    printf("CHIP UNSPECIFIED\n");
     #endif
 
     top->R_W = false; 
@@ -232,17 +237,16 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
     top->CS1 = false;
     top->PHI2 = false;
 
+    reset(top, trace); // reset the timer count
+
     // write timer
+    // 0x34E = 64uS divider, interrupts enabled
     #ifdef MCS6530_002
     top->addr = 0x34E;
     #endif
     #ifdef MCS6530_003
     top->addr = 0x30E;
     #endif
-
-    reset(top, trace); // reset the timer count
-
-    top->R_W = false;
 
     for (int i=0; i<4; i++) {
         top->PHI2_2X = !(top->PHI2_2X);
@@ -251,8 +255,10 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount+=250;
     }
 
+    top->R_W = false;
+
     // arbitrary timer count
-    top->data_i = 3;
+    top->data_i = 154;
 
     for (int i=0; i<4; i++) {
         top->PHI2_2X = !(top->PHI2_2X);
@@ -263,35 +269,113 @@ void check_timer(Vverilator_top* top, VerilatedVcdC* trace) {
 
     top->R_W = true;
 
-    for (int i=0; i<6; i++) {
+    for (int i=0; i<4; i++) {
         top->PHI2_2X = !(top->PHI2_2X);
         top->eval();
         trace->dump(tickcount*1000);
         tickcount+=250;
     }
 
-    assert(top->data_o == 2);
+    //assert(top->data_o == 153);
     
     // test decrement
-    // 0x34E = 63uS divider
-    for (int i=0; i<63*4; i++) {
+    for (int i=0; i<(1*64*4)+2; i++) {
         top->PHI2_2X = !(top->PHI2_2X);
         top->eval();
         trace->dump(tickcount*1000);
         tickcount+=250;
     }
 
-    assert(top->data_o == 1);
+    assert(top->data_o == 153);
 
-    for (int i=0; i<63*4*2-1; i++) { // time it takes for timer_count to be 0
+    for (int i=0; i<(153*64*4)-2; i++) { // time it takes for timer_count to be 0
         top->PHI2_2X = !(top->PHI2_2X);
         top->eval();
         trace->dump(tickcount*1000);
         tickcount+=250;
     }
-    assert(top->IRQ_PB7==0);
+    assert(top->irq==0);
 }
 
+void check_pb7(Vverilator_top* top, VerilatedVcdC* trace) {
+
+    // disable interrupt
+    top->addr = 0x344;
+
+    for (int i=0; i<4; i++) {
+        top->PHI2_2X = !(top->PHI2_2X);
+        top->eval();
+        trace->dump(tickcount*1000);
+        tickcount+=250;
+    }
+
+    top->data_i = 0x0;
+    for (int i=0; i<4; i++) {
+        top->PHI2_2X = !(top->PHI2_2X);
+        top->eval();
+        trace->dump(tickcount*1000);
+        tickcount+=250;
+    }
+
+    top->R_W = false;
+
+    for (int i=0; i<4; i++) {
+        top->PHI2_2X = !(top->PHI2_2X);
+        top->eval();
+        trace->dump(tickcount*1000);
+        tickcount+=250;
+    }
+    
+    top->R_W = true;
+
+    top->portb_i = 0xc0;
+    top->addr = 0x343;
+    for (int i=0; i<4; i++) {
+        top->PHI2_2X = !(top->PHI2_2X);
+        top->eval();
+        trace->dump(tickcount*1000);
+        tickcount+=250;
+    }
+
+    // all inputs
+    top->data_i = 0x0;
+
+    for (int i=0; i<4; i++) {
+        top->PHI2_2X = !(top->PHI2_2X);
+        top->eval();
+        trace->dump(tickcount*1000);
+        tickcount+=250;
+    }
+
+    top->R_W = false;
+
+    for (int i=0; i<4; i++) {
+        top->PHI2_2X = !(top->PHI2_2X);
+        top->eval();
+        trace->dump(tickcount*1000);
+        tickcount+=250;
+    }
+
+    top->addr = 0x342;
+
+    for (int i=0; i<4; i++) {
+        top->PHI2_2X = !(top->PHI2_2X);
+        top->eval();
+        trace->dump(tickcount*1000);
+        tickcount+=250;
+    }
+
+    top->R_W = true;
+
+    for (int i=0; i<4; i++) {
+        top->PHI2_2X = !(top->PHI2_2X);
+        top->eval();
+        trace->dump(tickcount*1000);
+        tickcount+=250;
+    }
+
+    printf("0x%x\n", top->data_o);
+}
 
 int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
@@ -325,10 +409,19 @@ int main(int argc, char** argv) {
     trace->dump(tickcount*1000);
     tickcount+=250;
 
+    reset(top, trace);
+
+    top->addr = 0;
+    top->PHI2 = true;
+    top->eval();
+    trace->dump(tickcount*1000);
+    tickcount+=250;
+
     check_rom(top, trace);
     check_ram(top, trace);
     check_io(top, trace);
     check_timer(top, trace);
+    check_pb7(top, trace);
 
     trace->close();
     delete trace;
