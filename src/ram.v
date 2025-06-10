@@ -7,8 +7,8 @@ module ram (
     output reg [7:0] DO,
     output reg OE
 );
-
-  reg [7:0] RAM64[64];
+  
+(* ram_style = "block" *) reg [7:0] RAM64[64];
   reg [7:0] reg_data;
   reg [5:0] reg_addr;
 
@@ -18,10 +18,21 @@ module ram (
     end
   end
 
-  always@(posedge clk) begin
+
+`ifdef DEBUG
+    // hardcode the NMI and BREAK Vectors so I can be lazy
+    initial begin
+        RAM64[6'h3a] = 8'h00;
+        RAM64[6'h3e] = 8'h00;
+        RAM64[6'h3b] = 8'h1c;
+        RAM64[6'h3f] = 8'h1c;
+    end
+`endif
+
+  always @(posedge clk) begin
     if (enable) begin
-       reg_addr <= A;
-       reg_data <= RAM64[A];    
+        reg_addr <= A;
+        reg_data <= RAM64[A];    
     end
   end
 

@@ -11,12 +11,19 @@ BOARD=redip-rriot
 MCS6530_002 ?= 1
 MCS6530_003 ?= 0
 
+
 ifeq "$(MCS6530_003)" "1"
-	FLG = -DMCS6530_003
+	FLG += -DMCS6530_003
 	ARTIFACT = $(BUILD_DIR)/mcs6530_003.bin
 else ifeq "$(MCS6530_002)" "1"
-	FLG = -DMCS6530_002
+	FLG += -DMCS6530_002
 	ARTIFACT = $(BUILD_DIR)/mcs6530_002.bin
+endif
+
+DEBUG ?= 1
+
+ifeq "$(DEBUG)" "1"
+	FLG +=  -DDEBUG
 endif
 
 all: ${BUILD_DIR}/${PROJ}.bin
@@ -49,7 +56,7 @@ obj_dir/Vverilator_top: $(addprefix $(SRC_DIR)/, $(SRCS)) sim/verilator_top.v si
 sim: obj_dir/Vverilator_top
 
 lint: 
-	verible-verilog-lint $(addprefix $(SRC_DIR)/, $(SRCS)) $(FLG) sim/verilator_top.v --rules +explicit-parameter-storage-type=exempt_type:string
+	verible-verilog-lint $(addprefix $(SRC_DIR)/, $(SRCS))  sim/verilator_top.v --rules +explicit-parameter-storage-type=exempt_type:string
 
 format:
 	verible-verilog-format $(addprefix $(SRC_DIR)/, $(SRCS))  sim/verilator_top.v --inplace 

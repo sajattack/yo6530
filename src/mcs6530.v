@@ -73,6 +73,11 @@ module mcs6530 #(
       .A  (A),
       .DO (rom_do),
       .OE (rom_oe)
+`ifdef DEBUG
+      ,
+      .we_n(we_n),
+      .data_i(DI)
+`endif
   );
   end else if (CHIP_VERSION == 3) begin: _gen_rom3
   rom #(
@@ -83,7 +88,12 @@ module mcs6530 #(
       .A  (A),
       .DO (rom_do),
       .OE (rom_oe)
-  );
+`ifdef DEBUG
+      ,
+      .we_n(we_n),
+      .data_i(DI)
+`endif
+  ) ;
   end
 
   timer timer0 (
