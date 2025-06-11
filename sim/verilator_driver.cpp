@@ -5,6 +5,7 @@
 #include "verilated_vcd_c.h"
 
 #define MCS6530_002 1
+#define DEBUG 1
 
 static VerilatedVcdC *trace = nullptr;
 unsigned long tickcount = 0;
@@ -56,7 +57,7 @@ void check_rom(Vverilator_top* top, VerilatedVcdC* trace) {
         for (int i=0; i<4; i++) {
             top->PHI2_2X = !(top->PHI2_2X);
 
-            if (top->PHI2 == false)
+            if ((top->PHI2 == false) & (i % 2 == 0))
             {
                 top->addr = top->addr+1;
             }
@@ -83,6 +84,13 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
     top->RS0 = true;
     top->CS1 = false;
     //top->PHI2 = false;
+    
+    #ifdef MCS6530_002
+    top->addr = 0x3c0;
+    #endif
+    #ifdef MCS6530_003
+    top->addr = 0x380;
+    #endif
 
     for (int i=0; i<2; i++) {
         top->PHI2_2X = !(top->PHI2_2X);
@@ -90,16 +98,6 @@ void check_ram(Vverilator_top* top, VerilatedVcdC* trace) {
         trace->dump(tickcount*1000);
         tickcount+=250;
     }
-
-    #ifdef MCS6530_002
-    printf("CHIP 2\n");
-    top->addr = 0x3c0;
-    #elif MCS6530_003
-    top->addr = 0x380;
-    printf("CHIP 3\n");
-    #else
-    printf("CHIP UNSPECIFIED\n");
-    #endif
 
     top->R_W = false; 
 
@@ -164,7 +162,6 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
         trace->dump(tickcount*1000);
         tickcount+=250;
     }
-
     // write ddra
 
     #ifdef MCS6530_002
@@ -227,6 +224,7 @@ void check_io(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount+=250;
     }
 
+    //printf("0x%x\n", top->data_o);
     assert(top->data_o == 0x55);
     assert(top->porta_o == 0x55); 
 }
@@ -374,7 +372,8 @@ void check_pb7(Vverilator_top* top, VerilatedVcdC* trace) {
         tickcount+=250;
     }
 
-    printf("0x%x\n", top->data_o);
+    //printf("0x%x\n", top->data_o);
+    assert(top->data_o == 0xc0);
 }
 
 int main(int argc, char** argv) {
@@ -416,6 +415,16 @@ int main(int argc, char** argv) {
     top->eval();
     trace->dump(tickcount*1000);
     tickcount+=250;
+
+
+    #ifdef MCS6530_002
+    printf("CHIP 2\n");
+    #elif MCS6530_003
+    printf("CHIP 3\n");
+    #else
+    printf("CHIP UNSPECIFIED\n");
+    #endif
+
 
     check_rom(top, trace);
     check_ram(top, trace);

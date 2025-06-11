@@ -1,4 +1,3 @@
-
 module mcs6530 #(
     parameter CHIP_VERSION = 2
 ) (
