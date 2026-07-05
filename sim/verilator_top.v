@@ -80,7 +80,8 @@ module verilator_top (
   assign PA1 = ddra[1] ? porta_o[1] : 1'bz;
   assign PA0 = ddra[0] ? porta_o[0] : 1'bz;
 
-  assign IRQ_PB7 = irq_en ? irq : ddrb[7] ? portb_o[7]: 1'bz;
+  // PB7 as /IRQ is open-drain: pull low when asserted, release otherwise.
+  assign IRQ_PB7 = irq_en ? (irq ? 1'bz : 1'b0) : ddrb[7] ? portb_o[7]: 1'bz;
   // CS1_PB6 is an input
   assign CS2_PB5 = ddrb[5] ? portb_o[5]: 1'bz;
   assign PB4 = ddrb[4] ? portb_o[4] : 1'bz;
@@ -93,7 +94,7 @@ module verilator_top (
     porta_i[7] = !ddra[7] ? PA7 : 1'bz;
     portb_i[7] = !ddrb[7] ? IRQ_PB7: 1'bz;
     porta_i[6] = !ddra[6] ? PA6 : 1'bz;
-    //portb_i[6] = CS1_PB6;
+    portb_i[6] = CS1;  // PB6 cell is the CS1 input on the -002/-003 mask
     porta_i[5] = !ddra[5] ? PA5 : 1'bz;
     portb_i[5] = !ddrb[5] ? CS2_PB5  : 1'bz;
     porta_i[4] = !ddra[4] ? PA4 : 1'bz;
