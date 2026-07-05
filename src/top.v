@@ -112,6 +112,9 @@ module top (
 
 
   // Bidirectional data pins. Non-registered input, output and output enable.
+  // Drive only while PHI2 is high, like the real chip (READ timing TCDR is
+  // referenced to the positive clock transition): the bus must be free
+  // during PHI1 for other devices' turnaround.
   SB_IO #(
       .PIN_TYPE(6'b1010_01)
   ) io_data[7:0] (
@@ -119,7 +122,7 @@ module top (
 `ifdef VERILATOR
       .CLOCK_ENABLE     (1'b1),
 `endif
-      .OUTPUT_ENABLE    (OE),
+      .OUTPUT_ENABLE    (OE & phi2_io),
       .D_IN_0           (data_i),
       .D_OUT_0          (data_o)
   );
