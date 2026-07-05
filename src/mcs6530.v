@@ -42,7 +42,7 @@ module mcs6530 #(
   logic io_enable;
 
   always_comb begin
-    rom_enable = rst_n & !RS0 & CS1;
+    rom_enable = rst_n & !RS0 & CS1 & we_n;  // read-only: never drive DB on writes
     if (CHIP_VERSION == 2) begin
         ram_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & A[7] & A[6];
         io_enable = rst_n & RS0 & !CS1 & A[9] & A[8] & ~A[7] & A[6] & ~A[2];
