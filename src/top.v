@@ -51,11 +51,8 @@ module top (
   wire we_n;
   wire rst_n;
   wire phi2_io;
-  reg phi1_io;
-
-  always @* begin
-      phi1_io = ~phi2_io;
-  end
+  wire cs1;
+  wire irq, irq_en;
 
   wire OE;
 
@@ -114,7 +111,7 @@ module top (
 
 
 
-  // Bidirectional data pins. Registered input and output enable.
+  // Bidirectional data pins. Non-registered input, output and output enable.
   SB_IO #(
       .PIN_TYPE(6'b1010_01)
   ) io_data[7:0] (
@@ -127,7 +124,7 @@ module top (
       .D_OUT_0          (data_o)
   );
 
-  // Bidirectional io port A. Registered input and output enable.
+  // Bidirectional io port A. Non-registered input, output and output enable.
   SB_IO #(
       .PIN_TYPE(6'b1010_01),
       .PULLUP(1'b1)
@@ -141,23 +138,25 @@ module top (
       .D_OUT_0          (porta_o)
   );
 
-wire cs1;
-reg dontcare;
-reg irq, irq_en;
-
-  // Bidirectional io port B. Registered input and output enable.
+  // Bidirectional io port B.  The 6530-002/-003 mask uses the PB6 cell as
+  // the CS1 input, so there is no PB6 I/O: reading port B bit 6 returns
+  // the CS1 pin level.  PB7 doubles as the /IRQ output when enabled by
+  // A3; the datasheet specifies it only pulls low, so it is driven
+  // open-drain here to allow wire-ANDing with other interrupt sources.
   SB_IO #(
       .PIN_TYPE(6'b1010_01),
       .PULLUP(1'b1)
-  ) io_portb[7:0] (
-      .PACKAGE_PIN      ({IRQ_PB7, dontcare, CS2_PB5, PB4, PB3, PB2, PB1, PB0}),
+  ) io_portb[6:0] (
+      .PACKAGE_PIN      ({IRQ_PB7, CS2_PB5, PB4, PB3, PB2, PB1, PB0}),
 `ifdef VERILATOR
       .CLOCK_ENABLE     (1'b1),
 `endif
-      .OUTPUT_ENABLE    ({irq_en ? 1'b1: ddrb[7], ddrb[6:0]}),
-      .D_IN_0           (portb_i),
-      .D_OUT_0          ({irq_en ? irq: portb_o[7], portb_o[6:0]})
+      .OUTPUT_ENABLE    ({irq_en ? ~irq : ddrb[7], ddrb[5:0]}),
+      .D_IN_0           ({portb_i[7], portb_i[5:0]}),
+      .D_OUT_0          ({irq_en ? 1'b0 : portb_o[7], portb_o[5:0]})
   );
+
+  assign portb_i[6] = cs1;
 
 
   // Address pin inputs.
@@ -170,9 +169,6 @@ reg irq, irq_en;
 `endif
       .D_IN_0           (addr)
   );
-
-// expand this width later
-wire [2:0] chip_version;
 
   mcs6530 #(
     `ifdef MCS6530_002
