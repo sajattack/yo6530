@@ -21,6 +21,13 @@ module timer (
 
   assign irq = ~(flag & irq_en);
 
+  initial begin
+      timer_divider <= 10'd0;
+      timer_count   <= 10'd0;
+      timer         <= 8'd0;
+      flag          <= 1'b0;
+  end
+
   always @(posedge clk) begin
     if (enable && rst_n) begin
       reg_addr <= A;
@@ -36,10 +43,6 @@ module timer (
 
   always @(negedge clk) begin
     if (~rst_n) begin
-      timer_divider <= 10'd0;
-      timer_count   <= 10'd0;
-      timer         <= 8'd0;
-      flag          <= 1'b0;
       irq_en        <= 1'b0;
     end else begin
       // Free-running countdown.  The interrupt flag sets when the counter
